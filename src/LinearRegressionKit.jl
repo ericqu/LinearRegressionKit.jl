@@ -20,7 +20,7 @@ include("newey_west.jl")
 include("kfold.jl")
 
 """
-    struct linRegRes
+    struct linRegRes 
 
     Store results from the regression
 """
