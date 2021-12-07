@@ -1,4 +1,4 @@
-module LinearRegression
+module LinearRegressionKit
 
 using NamedArrays:length
 using LinearAlgebra:length
