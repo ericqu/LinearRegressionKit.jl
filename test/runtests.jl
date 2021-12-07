@@ -1,4 +1,4 @@
-using LinearRegression
+using LinearRegressionKit
 using Test, DataFrames
 using StatsModels
  

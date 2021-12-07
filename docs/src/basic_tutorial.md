@@ -15,7 +15,7 @@ df = DataFrame(Carb=[0.1,0.3,0.5,0.6,0.7,0.9], OptDen=[0.086,0.269,0.446,0.538,0
 We want OptDen as the dependent variable (the response) and Carb as the independent variable (the predictor). Our model will have an intercept; however, the package will implicitly add the intercept to the model. We define the model as `Optden ~ Carb`; the variable's names need to be column names from the DataFrame, which is the second argument to the `regress` function. The `lm` object will then present essential information from the regression.
 
 ```@example basic1
-using LinearRegression
+using LinearRegressionKit
 using StatsModels # this is requested to use the @formula
 
 lm = regress(@formula(OptDen ~ Carb), df)

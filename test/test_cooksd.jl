@@ -1,6 +1,6 @@
 # using DataFrames, CSV
 
-# include("../src/LinearRegression.jl")
+# include("../src/LinearRegressionKit.jl")
 
 @testset "Cook's Distance" begin 
         st_df = DataFrame( 

@@ -7,7 +7,7 @@ function fitplot!(all_plots, results, lm, plot_args)
 
     length(rhs_noint) == 0 && return nothing
     length(rhs_noint) > 1 && begin
-        println("LinearRegression: Fit plot was requested but not appropriate for regression with multiple independent variables")
+        println("LinearRegressionKit: Fit plot was requested but not appropriate for regression with multiple independent variables")
         return nothing
     end
     length(lhs) == 0 && return nothing

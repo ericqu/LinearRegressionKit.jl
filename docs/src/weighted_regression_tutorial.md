@@ -29,7 +29,7 @@ using DataFrames
 We make a simple linear regression.
 
 ```@example weightedregression
-using LinearRegression, StatsModels
+using LinearRegressionKit, StatsModels
 using VegaLite
 
 f = @formula(y ~ x)

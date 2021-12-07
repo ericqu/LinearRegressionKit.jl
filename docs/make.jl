@@ -1,9 +1,9 @@
 push!(LOAD_PATH,"../src/")
 using Documenter
 using StatsModels, DataFrames, VegaLite
-using LinearRegression
+using LinearRegressionKit
 
-makedocs(sitename="LinearRegression.jl", modules = [LinearRegression] ,
+makedocs(sitename="LinearRegressionKit.jl", modules = [LinearRegressionKit] ,
     pages = Any[
         "Home" => "index.md",
         "Tutorials" => Any[
@@ -13,7 +13,7 @@ makedocs(sitename="LinearRegression.jl", modules = [LinearRegression] ,
     ])
 
 deploydocs(
-    repo = "github.com/ericqu/LinearRegression.jl.git",
+    repo = "github.com/ericqu/LinearRegressionKit.jl.git",
     push_preview = false,
     devbranch = "main",
     devurl = "dev",

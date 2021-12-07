@@ -1,5 +1,5 @@
-# LinearRegression.jl Documentation
-LinearRegression.jl implements linear regression using the least-squares algorithm (relying on the sweep operator). This package is in the alpha stage. Hence it is likely that some bugs exist. Furthermore, the API might change in future versions.
+# LinearRegressionKit.jl Documentation
+LinearRegressionKit.jl implements linear regression using the least-squares algorithm (relying on the sweep operator). This package is in the alpha stage. Hence it is likely that some bugs exist. Furthermore, the API might change in future versions.
 
 The usage aims to be straightforward, a call to ```regress``` to build a linear regression model, and a call to ```predict_in_sample``` to predict data using the built linear regression model.
 When predicting on data not present during the regression, use the ```predict_out_of_sample``` function as this does not require a response value (consequently, statistics that need a response, as the residuals, are not available.)
@@ -140,7 +140,7 @@ The leverage or hat matrix is calculated as:
 #### Heteroskedasticity and autocorrelation consistent estimator (HAC)
 
 Newey-West estimator calculation is not documented yet.
-See [reference implementation](https://github.com/mcreel/Econometrics/blob/508aee681ca42ff1f361fd48cd64de6565ece221/src/NP/NeweyWest.jl) [current implementation](https://github.com/ericqu/LinearRegression.jl/blob/docu/src/newey_west.jl) for details.
+See [reference implementation](https://github.com/mcreel/Econometrics/blob/508aee681ca42ff1f361fd48cd64de6565ece221/src/NP/NeweyWest.jl) [current implementation](https://github.com/ericqu/LinearRegressionKit.jl/blob/docu/src/newey_west.jl) for details.
 
 ### Statistics related to the prediction
 Predicting values using independent variables and a model will generate predicted values and some additional statistics dependent on the value of the `req_stats` argument of the `predict*` functions.

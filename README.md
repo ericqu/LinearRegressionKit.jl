@@ -44,17 +44,17 @@ x             │     27.6201      1.66699      16.5688  2.41337e-12      24.117
 # Contrasts with Julia Stats GLM package
 First, the GLM package provides more than linear regression with Ordinary Least-Squares through the Generalized Linear Model with Maximum Likelihood Estimation.
 
-LinearRegression now accept model without intercept. Like models made with GLM the intercept is implicit, and to enable the no intercept the user must specify it in the formula (for instance ```y  ~ 0 + x```).
+LinearRegressionKit now accept model without intercept. Like models made with GLM the intercept is implicit, and to enable the no intercept the user must specify it in the formula (for instance ```y  ~ 0 + x```).
 
-LinearRegression now supports analytical weights; GLM supports frequency weights.
+LinearRegressionKit now supports analytical weights; GLM supports frequency weights.
 
-Both LinearRegression and GLM rely on StatsModels.jl for the model's description (@formula); hence it is easy to move between the two packages. Similarly, contrasts and categorical variables are defined in the same way facilitating moving from one to the other when needed.
+Both LinearRegressionKit and GLM rely on StatsModels.jl for the model's description (@formula); hence it is easy to move between the two packages. Similarly, contrasts and categorical variables are defined in the same way facilitating moving from one to the other when needed.
 
-LinearRegression relies on the Sweep operator to estimate the coefficients, and GLM depends on Cholesky and QR factorizations.
+LinearRegressionKit relies on the Sweep operator to estimate the coefficients, and GLM depends on Cholesky and QR factorizations.
 
 The Akaike information criterion (AIC) is calculated with the formula relevant only for Linear Regression hence enabling comparison between linear regressions (AIC=n log(SSE / n) + 2p; where SSE is the Sum of Squared Errors and p is the number of predictors). On the other hand, the AIC calculated with GLM is more general (based on log-likelihood), enabling comparison between a broader range of models.
 
-LinearRegression package provides access to some robust covariance estimators (for Heteroscedasticity: White, HC0, HC1, HC2 and HC3 and for HAC: Newey-West)
+LinearRegressionKit package provides access to some robust covariance estimators (for Heteroscedasticity: White, HC0, HC1, HC2 and HC3 and for HAC: Newey-West)
 
 # List of Statistics 
 ## List of Statistics calculated about the linear regression model:
@@ -109,7 +109,7 @@ The following is a short example illustrating some statistics about the predicte
 First, a simulation of some data with a polynomial function.
 
 ```julia 
-using LinearRegression, DataFrames, StatsModels
+using LinearRegressionKit, DataFrames, StatsModels
 using Distributions # for the data generation with Normal() and Uniform()
 using VegaLite
 
@@ -148,7 +148,7 @@ This is pretty good, so let's further review some diagnostic plots.
 [[ps["fit"] ps["residuals"]]
     [ps["histogram density"] ps["qq plot"]]]
 ```
-![Overview Plots](https://github.com/ericqu/LinearRegression.jl/raw/main/assets/asset_exe_072_01.svg "Overview Plots")
+![Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_01.svg "Overview Plots")
 
 Please note that for the fit plot, the orange line shows the regression line, in dark grey the confidence interval for the mean, and in light grey the interval for the individuals predictions.
 
@@ -175,7 +175,7 @@ Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low
 (Intercept)   │     1.23626      2.65774     0.465157     0.642841     -4.03726      6.50979          0.0
 x ^ 3         │     1.04075    0.0151001      68.9236  1.77641e-85      1.01079      1.07071          1.0
 ```
-![Overview Plots](https://github.com/ericqu/LinearRegression.jl/raw/main/assets/asset_exe_072_02.svg "Overview Plots")
+![Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_02.svg "Overview Plots")
 
 Further, in addition to the diagnostic plots helping confirm if the residuals are normally distributed, a few tests can be requested:
 

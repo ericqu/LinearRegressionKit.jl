@@ -16,7 +16,7 @@ describe(df)
 We make a model with all variables and a couple of interactions.
 
 ```@example multi1
-using LinearRegression, StatsModels
+using LinearRegressionKit, StatsModels
 lm = regress(@formula(Sales ~ CompPrice + Income + Advertising + Population + Price + 
             ShelveLoc + Age + Education + Urban + US + Income & Advertising + Price & Age), df)
 ```
