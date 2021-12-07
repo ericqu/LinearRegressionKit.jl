@@ -1,19 +1,19 @@
-[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://ericqu.github.io/LinearRegression.jl/dev/)
-[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://ericqu.github.io/LinearRegression.jl/stable)
-# LinearRegression.jl
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://ericqu.github.io/LinearRegressionKit.jl/dev/)
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://ericqu.github.io/LinearRegressionKit.jl/stable)
+# LinearRegressionKit.jl
 
 LinearRegression.jl implements linear regression using the least-squares algorithm (relying on the sweep operator). This package is in the alpha stage. Hence it is likely that some bugs exist. Furthermore, the API might change in future versions. User's or prospective users' feedback is welcome.
 
 # Installation
-Enter the Pkg REPL by pressing ] from the Julia REPL. Then install the package with: ``` pkg> add https://github.com/ericqu/LinearRegression.jl.git ```. 
-To uninstall use ```  pkg> rm LinearRegression```
+Enter the Pkg REPL by pressing ] from the Julia REPL. Then install the package with: ``` pkg> add https://github.com/ericqu/LinearRegressionKit.jl.git ```. 
+To uninstall use ```  pkg> rm LinearRegressionKit```
 
 # Usage
 
 The following is a simple usage:
 
 ```julia 
-using LinearRegression, DataFrames, StatsModels
+using LinearRegressionKit, DataFrames, StatsModels
 
 x = [0.68, 0.631, 0.348, 0.413, 0.698, 0.368, 0.571, 0.433, 0.252, 0.387, 0.409, 0.456, 0.375, 0.495, 0.55, 0.576, 0.265, 0.299, 0.612, 0.631]
 y = [15.72, 14.86, 6.14, 8.21, 17.07, 9.07, 14.68, 10.37, 5.18, 9.36, 7.61, 10.43, 8.93, 10.33, 14.46, 12.39, 4.06, 4.67, 13.73, 14.75]
