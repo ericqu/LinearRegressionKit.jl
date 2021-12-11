@@ -5,7 +5,8 @@
 LinearRegressionKit.jl implements linear regression using the least-squares algorithm (relying on the sweep operator). This package is in the beta stage. Hence it is likely that some bugs exist. Furthermore, the API might change in future versions. User's or prospective users' feedback is welcome.
 
 # Installation
-Enter the Pkg REPL by pressing ] from the Julia REPL. Then install the package with: ``` pkg> add https://github.com/ericqu/LinearRegressionKit.jl.git ```. 
+Enter the Pkg REPL by pressing ] from the Julia REPL. Then install the package with: 
+``` pkg> add LinearRegressionKit ``` or  ```pkg> add https://github.com/ericqu/LinearRegressionKit.jl.git ```. 
 To uninstall use ```  pkg> rm LinearRegressionKit```
 
 # Usage
