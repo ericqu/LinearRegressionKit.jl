@@ -1,6 +1,5 @@
 using LinearRegressionKit
-using Test, DataFrames
-using StatsModels
+using Test, DataFrames, StatsModels
  
 include("test_sweep_operator.jl")
 include("test_utilities.jl")
@@ -10,3 +9,4 @@ include("test_lessthanfullrank.jl")
 include("test_noint.jl")
 include("test_heteroscedasticity.jl")
 include("test_kfold.jl")
+include("test_ridge.jl")

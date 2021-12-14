@@ -1,16 +1,12 @@
 module LinearRegressionKit
 
-using NamedArrays:length
-using LinearAlgebra:length
-using Distributions:length
-export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold
+export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge
 
 using Base: Tuple, Int64, Float64, Bool
 using StatsBase:eltype, isapprox, length, coefnames, push!, append!
-using Distributions, HypothesisTests
+using Distributions, HypothesisTests, LinearAlgebra
 using Printf, NamedArrays, FreqTables # FreqTables for check_cardinality
-using StatsBase, Random
-using StatsModels, DataFrames
+using StatsBase, Random, StatsModels, DataFrames
 using VegaLite
 
 include("sweep_operator.jl")
@@ -18,6 +14,7 @@ include("utilities.jl")
 include("vl_utilities.jl")
 include("newey_west.jl")
 include("kfold.jl")
+include("ridge.jl")
 
 """
     struct linRegRes
@@ -164,8 +161,8 @@ end
 """
     function getVIF(x, intercept, p)
 
-    (internal) Calculates the VIF, Variance Inflation Factor, for a given regression.
-    When the has an intercept use the simplified formula. When there is no intercept use the classical formula.
+    (internal) Calculates the VIF, Variance Inflation Factor, for a given regression (the X).
+    When the regression has an intercept uses the simplified formula. When there is no intercept uses the classical formula.
 """
 function getVIF(x, intercept, p)
     if intercept
@@ -233,12 +230,12 @@ function lr_predict(xs, coefs, intercept::Bool)
 end
 
 """
-    function hasintercept(f::StatsModels.FormulaTerm)
+    function hasintercept!(f::StatsModels.FormulaTerm)
     (internal) return a tuple with the first item being true when the formula has an intercept term, the second item being the potentially updated formula.
     If there is no intercept indicated add one.
     If the intercept is specified as absent (y ~ 0 + x) then do not change.
 """
-function hasintercept(f::StatsModels.FormulaTerm)
+function hasintercept!(f::StatsModels.FormulaTerm)
     intercept = true
     if f.rhs isa ConstantTerm{Int64}
         intercept = convert(Bool, f.rhs.n)
@@ -298,6 +295,60 @@ function get_scorr(typess, sst, intercept)
     return scorr
 end
 
+
+"""
+function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+
+    (Internal) Give a design matrix (with x and y separated) given a formula and dataframe.
+    Uses weights, and contrasts when given.
+    Updates the formula and to removes ambiguity about the intercept term.
+    Potentially provide a new dataframe
+"""
+function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+ 
+    intercept, f = hasintercept!(f)
+
+    copieddf = df 
+    if remove_missing
+        copieddf = copy(df[: , Symbol.(keys(schema(f, df).schema))])
+        dropmissing!(copieddf)
+    end
+    
+    if isa(weights, String)
+        if !in(Symbol(weights), propertynames(copieddf))
+            println("Weights have been specified being the column $(weights) however such colum does not exist in the dataframe provided. Regression will be done without weights")
+            weights = nothing
+        else
+            if remove_missing
+                copieddf[!, weights] = df[!, weights]
+            end
+            allowmissing!(copieddf, weights)
+            copieddf[!, weights][copieddf[!, weights] .<= 0] .= missing
+            dropmissing!(copieddf)
+        end
+    end
+    isweighted = !isnothing(weights)
+    
+    if isnothing(contrasts)
+        dataschema = schema(f, copieddf)
+    else
+        dataschema = schema(f, copieddf, contrasts)
+    end
+    updatedformula = apply_schema(f, dataschema)
+    
+    y, x = modelcols(updatedformula, copieddf)
+    n, p = size(x)
+    if isweighted
+        x = x .* sqrt.(copieddf[!, weights])
+        y = y .* sqrt.(copieddf[!, weights])
+    end
+
+    return x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema
+
+end
+
 """
     function regress(f::StatsModels.FormulaTerm, df::AbstractDataFrame, req_plots; α::Float64=0.05, req_stats=["default"], weights::Union{Nothing,String}=nothing, remove_missing=false, cov=[:none], contrasts=nothing, plot_args=Dict("plot_width" => 400, "loess_bw" => 0.6, "residuals_with_density" => false))
 
@@ -350,47 +401,12 @@ end
 """
 function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; α::Float64=0.05, req_stats=["default"], weights::Union{Nothing,String}=nothing,
                 remove_missing=false, cov=[:none], contrasts=nothing)
-    intercept, f = hasintercept(f)
-
     (α > 0. && α < 1.) || throw(ArgumentError("α must be between 0 and 1"))
- 
-    copieddf = df 
-    if remove_missing
-        copieddf = copy(df[: , Symbol.(keys(schema(f, df).schema))])
-        dropmissing!(copieddf)
-    end
     
-    if isa(weights, String)
-        if !in(Symbol(weights), propertynames(copieddf))
-            println("Weights have been specified being the column $(weights) however such colum does not exist in the dataframe provided. Regression will be done without weights")
-            weights = nothing
-        else
-            if remove_missing
-                copieddf[!, weights] = df[!, weights]
-            end
-            allowmissing!(copieddf, weights)
-            copieddf[!, weights][copieddf[!, weights] .<= 0] .= missing
-            dropmissing!(copieddf)
-        end
-    end
-    isweighted = !isnothing(weights)
-    
-    
-    if isnothing(contrasts)
-        dataschema = schema(f, copieddf)
-    else
-        dataschema = schema(f, copieddf, contrasts)
-    end
-    updatedformula = apply_schema(f, dataschema)
-    
-    y, x = modelcols(updatedformula, copieddf)
-    n, p = size(x)
-    if isweighted
-        x = x .* sqrt.(copieddf[!, weights])
-        y = y .* sqrt.(copieddf[!, weights])
-    end
+    x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts)
+
     xy = [x y]
-    
+
     xytxy = xy' * xy 
     
     needed_stats = get_needed_model_stats(req_stats)
