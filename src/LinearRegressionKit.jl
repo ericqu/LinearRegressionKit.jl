@@ -23,7 +23,7 @@ include("ridge.jl")
 """
 struct linRegRes 
     extended_inverse::Matrix                # Store the extended inverse matrix 
-    coefs::Union{Nothing,Vector}            # Store the coefficients of the fitted model
+    coefs::Vector                           # Store the coefficients of the fitted model
     white_types::Union{Nothing,Vector}      # Store the type of White's covariance estimator(s) used
     hac_types::Union{Nothing,Vector}        # Store the type of White's covariance estimator(s) used
     stderrors::Union{Nothing,Vector}        # Store the standard errors for the fitted model
@@ -197,15 +197,21 @@ function getSST(y, intercept)
 end
 
 """
-    function getSST(y, intercept, weights)
+    function getSST(y, intercept, weights, ridge=false)
 
     (internal) Calculates "total sum of squares" for weighted regression see link for description.
     https://en.wikipedia.org/wiki/Total_sum_of_squares
-    When the mode has no intercept the SST becomes the sum of squares of y
+    When the mode has no intercept the SST becomes the sum of squares of y.
+    When called from ridge regression the ys are not weighted, when called from regression the ys are already weighted.
 """
-function getSST(y, intercept, weights)
+function getSST(y, intercept, weights, ridge=false)
     SST = zero(eltype(y))
-    unweightedys = y ./ sqrt.(weights)
+    unweightedys = nothing
+    if ridge 
+        unweightedys = y
+    else
+        unweightedys = y ./ sqrt.(weights)
+    end
     if intercept
         ȳ = mean(unweightedys, aweights(weights))
         SST = sum(weights .* abs2.(unweightedys .- ȳ))
@@ -306,7 +312,7 @@ function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataF
     Potentially provide a new dataframe
 """
 function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; 
-    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing, ridge=false)
  
     intercept, f = hasintercept!(f)
 
@@ -340,7 +346,7 @@ function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataF
     
     y, x = modelcols(updatedformula, copieddf)
     n, p = size(x)
-    if isweighted
+    if isweighted && ridge == false
         x = x .* sqrt.(copieddf[!, weights])
         y = y .* sqrt.(copieddf[!, weights])
     end
