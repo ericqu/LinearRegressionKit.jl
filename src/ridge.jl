@@ -203,3 +203,25 @@ function Base.show(io::IO, rr::ridgeRegRes)
         [rr.coefs, rr.VIF], ["Coefs", "VIF"], rr.updatedformula)
 
 end
+
+"""
+    function predict_in_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+
+    Using the estimated coefficients from the regression make predictions, and calculate related statistics.
+"""
+function predict_in_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+    predict_internal(df, rr.modelformula, rr.updatedformula, rr.weighted, rr.weights, nothing, rr.coefs, rr.intercept,
+        nothing, nothing, nothing, nothing, rr.p, rr.observations, false;
+        α=nothing, req_stats=[:predicted, :residuals], dropmissingvalues=dropmissingvalues)
+end
+
+"""
+    function predict_out_of_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+
+    Similar to `predict_in_sample` although it does not expect a response variable nor produce statistics requiring a response variable.
+"""
+function predict_out_of_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+    predict_internal(df, rr.modelformula, rr.updatedformula, rr.weighted, rr.weights, nothing, rr.coefs, rr.intercept,
+        nothing, nothing, nothing, nothing, rr.p, rr.observations, true;
+        α=nothing, req_stats=[:predicted], dropmissingvalues=dropmissingvalues)
+end

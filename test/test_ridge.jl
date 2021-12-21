@@ -68,6 +68,7 @@
 
     df = DataFrame(tw, [:y,:x,:w])
     f = @formula(y ~ x)
+    lm, ps = regress(f, df, "all", weights="w", req_stats=["default", "vif"])
     lm = regress(f, df, weights="w", req_stats=["default", "vif"])
     rr = ridge(f, df, 0., weights="w")
     @test isapprox(lm.coefs, rr.coefs)
@@ -76,6 +77,14 @@
     @test isapprox(lm.ADJR2, rr.ADJR2)
     @test isapprox(lm.MSE, rr.MSE)
     @test isapprox(lm.RMSE, rr.RMSE)
+
+    t_predis = predict_in_sample(lm, df, req_stats=req_stats=[:predicted, :residuals])
+    predis = predict_in_sample(rr, df)
+    @test isapprox(t_predis.predicted, predis.predicted)
+    @test isapprox(t_predis.residuals, predis.residuals)
+
+    predos = predict_out_of_sample(rr, df)
+    @test isapprox(t_predis.predicted, predos.predicted)
 
     wrdf = ridge(f, df, 0:0.1:0.2, weights="w")
     @test isapprox(0.:0.1:0.2 , wrdf.λ)

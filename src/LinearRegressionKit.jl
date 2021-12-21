@@ -262,7 +262,6 @@ end
     function get_pcorr(typess, sse, intercept)
 
     (internal) Get squared partial correlation coefficient given a TYPE1SS or Type2SS.
-
 """
 function get_pcorr(typess, sse, intercept)
     pcorr = Vector{Union{Missing, Float64}}(undef, length(typess))
