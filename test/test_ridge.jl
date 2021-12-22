@@ -87,7 +87,7 @@
     @test isapprox(t_predis.predicted, predos.predicted)
 
     wrdf = ridge(f, df, 0:0.1:0.2, weights="w")
-    @test isapprox(0.:0.1:0.2 , wrdf.λ)
+    @test isapprox(0.:0.1:0.2 , wrdf.k)
     @test isapprox([0.1828582250674794, 0.18288116845535146, 0.18293534034338269], wrdf.MSE)
     @test isapprox([0.42761925245185045, 0.42764607849874114, 0.42770941109985255], wrdf.RMSE)
     @test isapprox([0.014954934572438905, 0.014831340071840282, 0.014539519723204886], wrdf.R2)

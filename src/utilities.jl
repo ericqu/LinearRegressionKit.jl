@@ -69,7 +69,7 @@ end
 """
 get_all_model_stats() = Set([:coefs, :sse, :mse, :sst, :rmse, :aic, :sigma, :t_statistic, :vif, :r2, :adjr2, :stderror, :t_values, :p_values, :ci,
                             :diag_normality, :diag_ks, :diag_ad, :diag_jb, :diag_heteroskedasticity, :diag_white, :diag_bp, :press, 
-                            :t1ss, :t2ss, :pcorr1, :pcorr2 , :scorr1, :scorr2 ])
+                            :t1ss, :t2ss, :pcorr1, :pcorr2 , :scorr1, :scorr2, :cond ])
 
 get_needed_model_stats(req_stats::String) = return get_needed_model_stats([req_stats])
 get_needed_model_stats(req_stats::Symbol) = return get_needed_model_stats(Set([req_stats]))
@@ -109,6 +109,7 @@ function get_needed_model_stats(req_stats::Vector{Symbol})
     :diag_jb in req_stats && push!(needed, :diag_jb)
     :diag_white in req_stats && push!(needed, :diag_white)
     :diag_bp in req_stats && push!(needed, :diag_bp)
+    :cond in req_stats && push!(needed, :cond)
 
     if :diag_normality in req_stats
         push!(needed, :diag_ks)

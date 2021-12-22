@@ -2,63 +2,74 @@
 # # see https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html
 
 """
-    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, λ::Float64 ; 
-    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing )
+    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::Float64 ; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
 
-    Ridge regression, expects a λ parameter (also known as k).
+    Ridge regression, expects a k parameter (also known as k).
+    When weights are provided, result in a weighted ridge regression.
 """
-    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, λ::Float64 ; 
+function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::Float64 ; 
+        weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+    X, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = 
+    design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts, ridge=true)
+
+    cweights = nothing
+    if !isnothing(weights)
+        cweights = copieddf[!, weights]
+    end
+    coefs, vifs = iridge(X, y, intercept, k, cweights)
+
+    mse, rmse, r2, adjr2 = iridge_stats(X, y, coefs, intercept, n, p, cweights)
+
+    res_ridge_reg = ridgeRegRes(
+        k, p, n, intercept, coefs,
+        vifs, mse, rmse, r2, adjr2, f, updatedformula, dataschema, isweighted, weights)
+
+    return res_ridge_reg
+end
+
+"""
+    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::Float64 ; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+
+    Ridge regression, expects a range of k parameter (also known as k).
+    When weights are provided, result in a weighted ridge regression.
+"""
+function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks::AbstractRange ;
             weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing )
-            # weights will be applied later 
-        X, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = 
-        design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts, ridge=true)
+    X, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = 
+    design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts, ridge=true)
 
-        cweights = nothing
-        if !isnothing(weights)
-            cweights = copieddf[!, weights]
-        end
-        coefs, vifs = iridge(X, y, intercept, λ, cweights)
+    vcoefs, vvifs = iridge(X, y, intercept, ks)
+    cweights = nothing
+    if !isnothing(weights)
+        cweights = copieddf[!, weights]
+    end
+    vcoefs, vvifs = iridge(X, y, intercept, ks, cweights)
 
-        mse, rmse, r2, adjr2 = iridge_stats(X, y, coefs, intercept, n, p, cweights)
+    vmse = Vector{Float64}(undef, length(ks))
+    vrmse = Vector{Float64}(undef, length(ks))
+    vr2 = Vector{Float64}(undef, length(ks))
+    vadjr2 = Vector{Float64}(undef, length(ks))
 
-        res_ridge_reg = ridgeRegRes(
-            λ, p, n, intercept, coefs,
-            vifs, mse, rmse, r2, adjr2, f, updatedformula, dataschema, isweighted, weights)
-
-        return res_ridge_reg
+    for (i, x) in enumerate(ks)
+        vmse[i], vrmse[i], vr2[i], vadjr2[i] = iridge_stats(X, y, vcoefs[i], intercept, n, p, cweights)
     end
 
-    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, λs::AbstractRange ;
-             weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing )
-            #  weights will be applied later
-        X, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = 
-        design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts, ridge=true)
-   
-        vcoefs, vvifs = iridge(X, y, intercept, λs)
-        cweights = nothing
-        if !isnothing(weights)
-            cweights = copieddf[!, weights]
-        end
-        vcoefs, vvifs = iridge(X, y, intercept, λs, cweights)
+    coefs_names = encapsulate_string(string.(StatsBase.coefnames(updatedformula.rhs)))
+    vifs_names = "vif_" .* coefs_names
+    cv = [ks vmse vrmse vr2 vadjr2 transpose(hcat(vcoefs...)) transpose(hcat(vvifs...)) ]
+    all_names = ["k", "MSE", "RMSE", "R2", "ADJR2", coefs_names..., vifs_names... ]
+    df = DataFrame(cv, all_names)
 
-        vmse = Vector{Float64}(undef, length(λs))
-        vrmse = Vector{Float64}(undef, length(λs))
-        vr2 = Vector{Float64}(undef, length(λs))
-        vadjr2 = Vector{Float64}(undef, length(λs))
+    return df 
+end
 
-        for (i, x) in enumerate(λs)
-            vmse[i], vrmse[i], vr2[i], vadjr2[i] = iridge_stats(X, y, vcoefs[i], intercept, n, p, cweights)
-        end
+"""
+    function prepare_ridge(X_orig, y_orig, intercept, weights::Union{Nothing,Vector{Float64}}=nothing)
 
-        coefs_names = encapsulate_string(string.(StatsBase.coefnames(updatedformula.rhs)))
-        vifs_names = "vif_" .* coefs_names
-        cv = [λs vmse vrmse vr2 vadjr2 transpose(hcat(vcoefs...)) transpose(hcat(vvifs...)) ]
-        all_names = ["λ", "MSE", "RMSE", "R2", "ADJR2", coefs_names..., vifs_names... ]
-        df = DataFrame(cv, all_names)
-
-        return df 
-    end
-
+    (internal) Prepare the design matrix for ridge regression by centering the data (potentially weighted).
+"""
 function prepare_ridge(X_orig, y_orig, intercept, weights::Union{Nothing,Vector{Float64}}=nothing)
     X = deepcopy(X_orig)
     y = deepcopy(y_orig)
@@ -99,10 +110,16 @@ function prepare_ridge(X_orig, y_orig, intercept, weights::Union{Nothing,Vector{
     return XTX, D, Z, ZTZ, ymean, Xmeans, y, X
 end
 
-function iridge(X_orig, y_orig, intercept, λ::Float64, weights::Union{Nothing,Vector{Float64}}=nothing)
+"""
+    function iridge(X_orig, y_orig, intercept, k::Float64, weights::Union{Nothing,Vector{Float64}}=nothing)
     XTX, D, Z, ZTZ, ymean, Xmeans, y, X = prepare_ridge(X_orig, y_orig, intercept, weights)
 
-    invZTZ = pinv(ZTZ + λ * I)
+    (internal) compute the coefficient(s) and the VIF of a ridge regression given a scalar k.
+"""
+function iridge(X_orig, y_orig, intercept, k::Float64, weights::Union{Nothing,Vector{Float64}}=nothing)
+    XTX, D, Z, ZTZ, ymean, Xmeans, y, X = prepare_ridge(X_orig, y_orig, intercept, weights)
+
+    invZTZ = pinv(ZTZ + k * I)
     coefs = invZTZ * (Z' * y) ./ (sqrt.(diag(XTX)))
     vifs = diag(invZTZ * ZTZ * invZTZ)
     
@@ -116,14 +133,21 @@ function iridge(X_orig, y_orig, intercept, λ::Float64, weights::Union{Nothing,V
     return coefs, vifs
 end
 
-function iridge(X_orig, y_orig, intercept, λs::AbstractRange, weights::Union{Nothing,Vector{Float64}}=nothing)
+"""
+    function iridge(X_orig, y_orig, intercept, ks::AbstractRange, weights::Union{Nothing,Vector{Float64}}=nothing)
     XTX, D, Z, ZTZ, ymean, Xmeans, y, X = prepare_ridge(X_orig, y_orig, intercept, weights)
 
-    vcoefs = Vector{Vector{}}(undef, length(λs))
-    vvifs = Vector{Vector{}}(undef, length(λs))
+    (internal) compute the coefficient(s) and the VIF for each ridge regression with a range of k.
 
-    for (i, λ) in enumerate(λs)
-        invZTZ = pinv(ZTZ + λ * I)
+"""
+function iridge(X_orig, y_orig, intercept, ks::AbstractRange, weights::Union{Nothing,Vector{Float64}}=nothing)
+    XTX, D, Z, ZTZ, ymean, Xmeans, y, X = prepare_ridge(X_orig, y_orig, intercept, weights)
+
+    vcoefs = Vector{Vector{}}(undef, length(ks))
+    vvifs = Vector{Vector{}}(undef, length(ks))
+
+    for (i, k) in enumerate(ks)
+        invZTZ = pinv(ZTZ + k * I)
         vcoefs[i] = invZTZ * (Z' * y) ./ (sqrt.(diag(XTX)))
         vvifs[i] = diag(invZTZ * ZTZ * invZTZ)
         
@@ -138,6 +162,11 @@ function iridge(X_orig, y_orig, intercept, λs::AbstractRange, weights::Union{No
     return vcoefs, vvifs
 end
 
+"""
+    function iridge_stats(X, y, coefs, intercept, n, p, weights::Union{Nothing,Vector{Float64}}=nothing)
+
+    (internal) compute the limited stats from a ridge regression.
+"""
 function iridge_stats(X, y, coefs, intercept, n, p, weights::Union{Nothing,Vector{Float64}}=nothing)
     ŷ = lr_predict(X, coefs, intercept)
     residuals = y .- ŷ
@@ -163,8 +192,11 @@ function iridge_stats(X, y, coefs, intercept, n, p, weights::Union{Nothing,Vecto
     return mse, rmse, r2, adjr2
 end
 
+"""
+Store the result of a single ridge (potentially weighted) regression
+"""
 struct ridgeRegRes
-    λ::Float64
+    k::Float64
     p::Float64
     observations
     intercept::Bool
@@ -192,7 +224,7 @@ function Base.show(io::IO, rr::ridgeRegRes)
     else
         println(io, "Ridge Regression")
     end
-    println(io, "Lambda (λ):\t", rr.λ)
+    println(io, "Lambda (k):\t", rr.k)
     println(io, "Model definition:\t", rr.modelformula)
     println(io, "Used observations:\t", rr.observations)
     println(io, "Model statistics:")

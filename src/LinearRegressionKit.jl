@@ -70,6 +70,7 @@ struct linRegRes
     weighted::Bool                          # Indicates if this is a weighted regression
     weights::Union{Nothing,String}          # Indicates which column of the dataframe contains the analytical weights
     PRESS::Union{Nothing,Float64}           # Store the PRESS statistic
+    cond::Union{Nothing,Float64}            # Store Condition number of the design matrix
 end
 
 """
@@ -78,11 +79,15 @@ end
     Display information about the fitted model
 """
 function Base.show(io::IO, lr::linRegRes) 
-    println(io, "Model definition:\t", lr.modelformula)
-    println(io, "Used observations:\t", lr.observations)
     if lr.weighted
         println(io, "Weighted regression")
     end
+    println(io, "Model definition:\t", lr.modelformula)
+    println(io, "Used observations:\t", lr.observations)
+    if !isnothing(lr.cond)
+        println(io, "Condition number:\t", lr.cond)
+    end
+
     println(io, "Model statistics:")
     # Display stats when available
     if !isnothing(lr.R2) && !isnothing(lr.ADJR2)
@@ -408,23 +413,26 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; �
                 remove_missing=false, cov=[:none], contrasts=nothing)
     (α > 0. && α < 1.) || throw(ArgumentError("α must be between 0 and 1"))
     
-    x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts)
-
-    xy = [x y]
-
-    xytxy = xy' * xy 
-    
     needed_stats = get_needed_model_stats(req_stats)
     # stats initialization
-        total_scalar_stats = Set([:sse, :mse, :sst, :r2, :adjr2, :rmse, :aic, :sigma, :t_statistic, :press ])
+        total_scalar_stats = Set([:sse, :mse, :sst, :r2, :adjr2, :rmse, :aic, :sigma, :t_statistic, :press, :cond ])
         total_vector_stats = Set([:coefs, :stderror, :t_values, :p_values, :ci, :vif, :t1ss, :t2ss, :pcorr1, :pcorr2, :scorr1, :scorr2])
         total_diag_stats = Set([:diag_ks, :diag_ad, :diag_jb, :diag_white, :diag_bp])
     
         scalar_stats = Dict{Symbol,Union{Nothing,Float64}}(intersect(total_scalar_stats, needed_stats) .=> nothing)
         vector_stats = Dict{Symbol,Union{Nothing,Vector}}(intersect(total_vector_stats, needed_stats) .=> nothing)
         diag_stats = Dict{Symbol,Union{Nothing,String}}(intersect(total_diag_stats, needed_stats) .=> nothing)
-
     sse = nothing
+
+    x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts)
+    xy = [x y]
+
+    if :cond in needed_stats
+        scalar_stats[:cond] = cond(xy)
+    end
+
+    xytxy = xy' * xy 
+
     try
         if :t1ss in needed_stats
             sse, vector_stats[:t1ss] = sweep_op_fullT1SS!(xytxy)
@@ -635,7 +643,8 @@ end
         f, dataschema, updatedformula, α,
         get(diag_stats, :diag_ks, nothing), get(diag_stats, :diag_ad, nothing), get(diag_stats, :diag_jb, nothing),
         get(diag_stats, :diag_white, nothing),  get(diag_stats, :diag_bp, nothing),
-        isweighted, weights, get(scalar_stats, :press, nothing)
+        isweighted, weights, get(scalar_stats, :press, nothing),
+        get(scalar_stats, :cond, nothing)
         )
     
     return sres
