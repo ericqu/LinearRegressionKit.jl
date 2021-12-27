@@ -258,7 +258,7 @@ When there is an intercept in the model the `pcorr1` and `pcorr2` are considered
 When there is an intercept in the model the `scorr1` and `scorr2` are considered `missing` for the intercept.
 
 ### Ridge Regression and Weighthed Ridge Regression
-Ridge regression and weighthed ridge regression are possible using the `ridge` functions however please not that only the following statistics are available: `MSE`, `RMSE`, `R2`, `ADJR2`, and `VIF`.
+Ridge regression and weighthed ridge regression are possible using the `ridge` functions; please note that only the following statistics are available: `MSE`, `RMSE`, `R2`, `ADJR2`, and `VIF`.
 The ridge constant `k` can be specified as scalar or as a range (`AbstractRange`).
 The coefficients calculation is inspired  by the details given in [SAS blog post](https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html).
 
