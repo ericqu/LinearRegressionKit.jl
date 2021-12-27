@@ -57,6 +57,8 @@ The Akaike information criterion (AIC) is calculated with the formula relevant o
 
 LinearRegressionKit package provides access to some robust covariance estimators (for Heteroscedasticity: White, HC0, HC1, HC2 and HC3 and for HAC: Newey-West)
 
+Ridge Regression (potentially with analytical weights) is implemented in the LinearRegressionKit package.
+
 # List of Statistics 
 ## List of Statistics calculated about the linear regression model:
 - AIC: Akaike information criterion with the formula AIC=n log(SSE / n) + 2p; where SSE is the Sum of Squared Errors and p is the number of predictors.
@@ -248,7 +250,5 @@ x ^ 3         │     1.04075    0.0129463      80.3897  5.60424e-92      1.0150
 
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
-## Notable changes since version 0.72
-- Addition of cross-validation features: K-fold cross-validation and the PRESS statistic at the model level.
-- Addition of several model statistics: Type 1 and 2 SS, squared partial correlation coefficients based on Type 1 SS and Type 2 SS, squared semi-partial correlation coefficients based on Type 1 and 2 SS.
-- additional diagnostic using the frequency tables to identify a set of categories with no observation.
+## Notable changes since version 0.73
+- Addition of Ridge regression
