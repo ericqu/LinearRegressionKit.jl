@@ -279,6 +279,15 @@ predict_out_of_sample(lr::linRegRes, df::AbstractDataFrame; α=0.05, req_stats=[
 predict_in_sample(lr::linRegRes, df::AbstractDataFrame; α=0.05, req_stats=["none"], dropmissingvalues=true)
 
 kfold(f, df, k, r = 1, shuffle=true; kwargs...)
+
+ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::Float64;  weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+
+ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks::AbstractRange ; weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing, traceplots = false)
+
+predict_in_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+
+predict_out_of_sample(rr::ridgeRegRes, df::AbstractDataFrame; dropmissingvalues=true)
+
 ```
 
 ## Index
