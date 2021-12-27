@@ -47,6 +47,5 @@ ps["coefs traceplot"]
 
 And here is the default trace plot for the VIFs:
 ```@example ridgeregression
-# ps["vifs traceplot"]
-println("just testing")
+ps["vifs traceplot"]
 ```

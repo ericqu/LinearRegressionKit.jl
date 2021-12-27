@@ -251,11 +251,22 @@ function leverage_plot!(all_plots, results, lm, plot_args)
     all_plots["leverage"] = p
 end
 
+function escape_javascript!(vec)
+    for i in length(vec)
+        vec[i] = replace(vec[i], "&"=>"&amp;")
+    end
+end
+
 function ridge_traceplots(rdf::AbstractDataFrame; width=400)
     nb_coefs = round(Int, (ncol(rdf) - 5) / 2)
     dfstats = names(rdf)[2:5]
     dfcoefs = nothing
     dfvifs = nothing
+
+    all_names = names(rdf)
+    @show(all_names)
+    escape_javascript!(all_names)
+    @show(all_names)
 
     if names(rdf)[6] == "(Intercept)"
         dfcoefs = names(rdf)[7:6 - 1 + nb_coefs]
