@@ -37,7 +37,7 @@
     
     rdf = ridge(@formula(y ~ x1 + x2), df, 0:0.1:0.2)
     coefs_names = ["(Intercept)",  "x1" , "x2" ]
-    vifs_names = "vif_" .* coefs_names
+    vifs_names = "vif " .* coefs_names
     @test isapprox(t_intercepts, rdf[!, coefs_names[1]])
     @test isapprox(t_x1s, rdf[!, coefs_names[2]])
     @test isapprox(t_x2s, rdf[!, coefs_names[3]])
@@ -94,7 +94,7 @@
     @test isapprox([-0.10817569860600629, -0.10831474241917971, -0.10864304031139449], wrdf.ADJR2)
     @test isapprox([2.3282371768678907, 2.4079428880617186, 2.4743643140565754], wrdf[!, "(Intercept)"])
     @test isapprox([0.08535712911515224, 0.07759739010468385, 0.07113094092929353], wrdf[!, "x"])
-    @test isapprox([0. , 0. , 0.], wrdf[!, "vif_(Intercept)"])
-    @test isapprox([1.0, 0.8264462809917354, 0.6944444444444445], wrdf[!, "vif_x"])
+    @test isapprox([0. , 0. , 0.], wrdf[!, "vif (Intercept)"])
+    @test isapprox([1.0, 0.8264462809917354, 0.6944444444444445], wrdf[!, "vif x"])
 
 end
