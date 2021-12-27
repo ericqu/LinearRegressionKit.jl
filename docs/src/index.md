@@ -260,7 +260,7 @@ When there is an intercept in the model the `scorr1` and `scorr2` are considered
 ### Ridge Regression and Weighthed Ridge Regression
 Ridge regression and weighthed ridge regression are possible using the `ridge` functions however please not that only the following statistics are available: `MSE`, `RMSE`, `R2`, `ADJR2`, and `VIF`.
 The ridge constant `k` can be specified as scalar or as a range (`AbstractRange`).
-The coefficients are calculated as per the formula given in SAS documentation, and inspired by the details given in [SAS blog post](https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html).
+The coefficients calculation is inspired  by the details given in [SAS blog post](https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html).
 
 >Let ``X`` be the matrix of the independent variables after centering [and scaling]the data, and let ``Y`` be a vector corresponding to the [centered]dependent variable. Let ``D`` be a diagonal matrix with diagonal elements as in ``X`X``. The ridge regression estimate corresponding to the ridge constant k can be computed as ``D^{-1/2} * (Z^{T}Z + k*I)^{-1} * Z^{T}Y ``.
 

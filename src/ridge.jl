@@ -29,14 +29,16 @@ function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::
 end
 
 """
-    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, k::Float64 ; 
-    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+    function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks::AbstractRange ; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing, traceplots=false)
 
     Ridge regression, expects a range of k parameter (also known as k).
     When weights are provided, result in a weighted ridge regression.
+    When traceplots are requested, also return a dictionnary of trace plots.
 """
 function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks::AbstractRange ;
-            weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing )
+            weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing,
+            traceplots = false )
     X, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = 
     design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts, ridge=true)
 
@@ -62,7 +64,12 @@ function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks:
     all_names = ["k", "MSE", "RMSE", "R2", "ADJR2", coefs_names..., vifs_names... ]
     df = DataFrame(cv, all_names)
 
-    return df 
+    if traceplots == false
+        return df 
+    else
+        return df, ridge_traceplots(df)
+    end
+
 end
 
 """
