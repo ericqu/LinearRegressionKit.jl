@@ -1,6 +1,6 @@
 module LinearRegressionKit
 
-export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge
+export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge, ridgeRegRes
 
 using Base: Tuple, Int64, Float64, Bool
 using StatsBase:eltype, isapprox, length, coefnames, push!, append!
