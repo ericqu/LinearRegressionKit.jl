@@ -17,15 +17,15 @@ StatsModels = "3eaba693-59b7-5ba5-a881-562e759f1c8d"
 VegaLite = "112f6efa-9a02-5b7d-90c0-432ed331239a"
 
 [compat]
-NamedArrays = "^0.9.6"
-julia = "^1.6"
-DataFrames = "~1.2.2" 
+DataFrames = "~1.2.2"
 Distributions = "~0.25.14"
 FreqTables = "~0.4.5"
 HypothesisTests = "~0.10.4"
+NamedArrays = "^0.9.6"
 StatsBase = "~0.33.10"
 StatsModels = "~0.6.24"
 VegaLite = "~2.6.0"
+julia = "^1.6"
 
 [extras]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"

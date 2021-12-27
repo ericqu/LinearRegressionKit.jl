@@ -1,16 +1,12 @@
 module LinearRegressionKit
 
-using NamedArrays:length
-using LinearAlgebra:length
-using Distributions:length
-export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold
+export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge
 
 using Base: Tuple, Int64, Float64, Bool
 using StatsBase:eltype, isapprox, length, coefnames, push!, append!
-using Distributions, HypothesisTests
+using Distributions, HypothesisTests, LinearAlgebra
 using Printf, NamedArrays, FreqTables # FreqTables for check_cardinality
-using StatsBase, Random
-using StatsModels, DataFrames
+using StatsBase, Random, StatsModels, DataFrames
 using VegaLite
 
 include("sweep_operator.jl")
@@ -18,6 +14,7 @@ include("utilities.jl")
 include("vl_utilities.jl")
 include("newey_west.jl")
 include("kfold.jl")
+include("ridge.jl")
 
 """
     struct linRegRes
@@ -26,7 +23,7 @@ include("kfold.jl")
 """
 struct linRegRes 
     extended_inverse::Matrix                # Store the extended inverse matrix 
-    coefs::Union{Nothing,Vector}            # Store the coefficients of the fitted model
+    coefs::Vector                           # Store the coefficients of the fitted model
     white_types::Union{Nothing,Vector}      # Store the type of White's covariance estimator(s) used
     hac_types::Union{Nothing,Vector}        # Store the type of White's covariance estimator(s) used
     stderrors::Union{Nothing,Vector}        # Store the standard errors for the fitted model
@@ -73,6 +70,7 @@ struct linRegRes
     weighted::Bool                          # Indicates if this is a weighted regression
     weights::Union{Nothing,String}          # Indicates which column of the dataframe contains the analytical weights
     PRESS::Union{Nothing,Float64}           # Store the PRESS statistic
+    cond::Union{Nothing,Float64}            # Store Condition number of the design matrix
 end
 
 """
@@ -81,11 +79,15 @@ end
     Display information about the fitted model
 """
 function Base.show(io::IO, lr::linRegRes) 
-    println(io, "Model definition:\t", lr.modelformula)
-    println(io, "Used observations:\t", lr.observations)
     if lr.weighted
         println(io, "Weighted regression")
     end
+    println(io, "Model definition:\t", lr.modelformula)
+    println(io, "Used observations:\t", lr.observations)
+    if !isnothing(lr.cond)
+        println(io, "Condition number:\t", lr.cond)
+    end
+
     println(io, "Model statistics:")
     # Display stats when available
     if !isnothing(lr.R2) && !isnothing(lr.ADJR2)
@@ -164,8 +166,8 @@ end
 """
     function getVIF(x, intercept, p)
 
-    (internal) Calculates the VIF, Variance Inflation Factor, for a given regression.
-    When the has an intercept use the simplified formula. When there is no intercept use the classical formula.
+    (internal) Calculates the VIF, Variance Inflation Factor, for a given regression (the X).
+    When the regression has an intercept uses the simplified formula. When there is no intercept uses the classical formula.
 """
 function getVIF(x, intercept, p)
     if intercept
@@ -200,15 +202,21 @@ function getSST(y, intercept)
 end
 
 """
-    function getSST(y, intercept, weights)
+    function getSST(y, intercept, weights, ridge=false)
 
     (internal) Calculates "total sum of squares" for weighted regression see link for description.
     https://en.wikipedia.org/wiki/Total_sum_of_squares
-    When the mode has no intercept the SST becomes the sum of squares of y
+    When the mode has no intercept the SST becomes the sum of squares of y.
+    When called from ridge regression the ys are not weighted, when called from regression the ys are already weighted.
 """
-function getSST(y, intercept, weights)
+function getSST(y, intercept, weights, ridge=false)
     SST = zero(eltype(y))
-    unweightedys = y ./ sqrt.(weights)
+    unweightedys = nothing
+    if ridge 
+        unweightedys = y
+    else
+        unweightedys = y ./ sqrt.(weights)
+    end
     if intercept
         ȳ = mean(unweightedys, aweights(weights))
         SST = sum(weights .* abs2.(unweightedys .- ȳ))
@@ -233,12 +241,12 @@ function lr_predict(xs, coefs, intercept::Bool)
 end
 
 """
-    function hasintercept(f::StatsModels.FormulaTerm)
+    function hasintercept!(f::StatsModels.FormulaTerm)
     (internal) return a tuple with the first item being true when the formula has an intercept term, the second item being the potentially updated formula.
     If there is no intercept indicated add one.
     If the intercept is specified as absent (y ~ 0 + x) then do not change.
 """
-function hasintercept(f::StatsModels.FormulaTerm)
+function hasintercept!(f::StatsModels.FormulaTerm)
     intercept = true
     if f.rhs isa ConstantTerm{Int64}
         intercept = convert(Bool, f.rhs.n)
@@ -259,7 +267,6 @@ end
     function get_pcorr(typess, sse, intercept)
 
     (internal) Get squared partial correlation coefficient given a TYPE1SS or Type2SS.
-
 """
 function get_pcorr(typess, sse, intercept)
     pcorr = Vector{Union{Missing, Float64}}(undef, length(typess))
@@ -296,6 +303,60 @@ function get_scorr(typess, sst, intercept)
     end
 
     return scorr
+end
+
+
+"""
+function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing)
+
+    (Internal) Give a design matrix (with x and y separated) given a formula and dataframe.
+    Uses weights, and contrasts when given.
+    Updates the formula and to removes ambiguity about the intercept term.
+    Potentially provide a new dataframe
+"""
+function design_matrix!(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; 
+    weights::Union{Nothing,String}=nothing, remove_missing=false, contrasts=nothing, ridge=false)
+ 
+    intercept, f = hasintercept!(f)
+
+    copieddf = df 
+    if remove_missing
+        copieddf = copy(df[: , Symbol.(keys(schema(f, df).schema))])
+        dropmissing!(copieddf)
+    end
+    
+    if isa(weights, String)
+        if !in(Symbol(weights), propertynames(copieddf))
+            println("Weights have been specified being the column $(weights) however such colum does not exist in the dataframe provided. Regression will be done without weights")
+            weights = nothing
+        else
+            if remove_missing
+                copieddf[!, weights] = df[!, weights]
+            end
+            allowmissing!(copieddf, weights)
+            copieddf[!, weights][copieddf[!, weights] .<= 0] .= missing
+            dropmissing!(copieddf)
+        end
+    end
+    isweighted = !isnothing(weights)
+    
+    if isnothing(contrasts)
+        dataschema = schema(f, copieddf)
+    else
+        dataschema = schema(f, copieddf, contrasts)
+    end
+    updatedformula = apply_schema(f, dataschema)
+    
+    y, x = modelcols(updatedformula, copieddf)
+    n, p = size(x)
+    if isweighted && ridge == false
+        x = x .* sqrt.(copieddf[!, weights])
+        y = y .* sqrt.(copieddf[!, weights])
+    end
+
+    return x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema
+
 end
 
 """
@@ -350,60 +411,28 @@ end
 """
 function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; α::Float64=0.05, req_stats=["default"], weights::Union{Nothing,String}=nothing,
                 remove_missing=false, cov=[:none], contrasts=nothing)
-    intercept, f = hasintercept(f)
-
     (α > 0. && α < 1.) || throw(ArgumentError("α must be between 0 and 1"))
- 
-    copieddf = df 
-    if remove_missing
-        copieddf = copy(df[: , Symbol.(keys(schema(f, df).schema))])
-        dropmissing!(copieddf)
-    end
-    
-    if isa(weights, String)
-        if !in(Symbol(weights), propertynames(copieddf))
-            println("Weights have been specified being the column $(weights) however such colum does not exist in the dataframe provided. Regression will be done without weights")
-            weights = nothing
-        else
-            if remove_missing
-                copieddf[!, weights] = df[!, weights]
-            end
-            allowmissing!(copieddf, weights)
-            copieddf[!, weights][copieddf[!, weights] .<= 0] .= missing
-            dropmissing!(copieddf)
-        end
-    end
-    isweighted = !isnothing(weights)
-    
-    
-    if isnothing(contrasts)
-        dataschema = schema(f, copieddf)
-    else
-        dataschema = schema(f, copieddf, contrasts)
-    end
-    updatedformula = apply_schema(f, dataschema)
-    
-    y, x = modelcols(updatedformula, copieddf)
-    n, p = size(x)
-    if isweighted
-        x = x .* sqrt.(copieddf[!, weights])
-        y = y .* sqrt.(copieddf[!, weights])
-    end
-    xy = [x y]
-    
-    xytxy = xy' * xy 
     
     needed_stats = get_needed_model_stats(req_stats)
     # stats initialization
-        total_scalar_stats = Set([:sse, :mse, :sst, :r2, :adjr2, :rmse, :aic, :sigma, :t_statistic, :press ])
+        total_scalar_stats = Set([:sse, :mse, :sst, :r2, :adjr2, :rmse, :aic, :sigma, :t_statistic, :press, :cond ])
         total_vector_stats = Set([:coefs, :stderror, :t_values, :p_values, :ci, :vif, :t1ss, :t2ss, :pcorr1, :pcorr2, :scorr1, :scorr2])
         total_diag_stats = Set([:diag_ks, :diag_ad, :diag_jb, :diag_white, :diag_bp])
     
         scalar_stats = Dict{Symbol,Union{Nothing,Float64}}(intersect(total_scalar_stats, needed_stats) .=> nothing)
         vector_stats = Dict{Symbol,Union{Nothing,Vector}}(intersect(total_vector_stats, needed_stats) .=> nothing)
         diag_stats = Dict{Symbol,Union{Nothing,String}}(intersect(total_diag_stats, needed_stats) .=> nothing)
-
     sse = nothing
+
+    x, y, n, p, intercept, f, copieddf, updatedformula, isweighted, dataschema = design_matrix!(f, df, weights=weights, remove_missing=remove_missing, contrasts=contrasts)
+    xy = [x y]
+
+    if :cond in needed_stats
+        scalar_stats[:cond] = cond(xy)
+    end
+
+    xytxy = xy' * xy 
+
     try
         if :t1ss in needed_stats
             sse, vector_stats[:t1ss] = sweep_op_fullT1SS!(xytxy)
@@ -614,7 +643,8 @@ end
         f, dataschema, updatedformula, α,
         get(diag_stats, :diag_ks, nothing), get(diag_stats, :diag_ad, nothing), get(diag_stats, :diag_jb, nothing),
         get(diag_stats, :diag_white, nothing),  get(diag_stats, :diag_bp, nothing),
-        isweighted, weights, get(scalar_stats, :press, nothing)
+        isweighted, weights, get(scalar_stats, :press, nothing),
+        get(scalar_stats, :cond, nothing)
         )
     
     return sres

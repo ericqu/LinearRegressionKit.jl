@@ -12,7 +12,7 @@ When some analytical positive weights are used, a weighted regression is perform
 ### Statistics related to the regression (the fitting)
 Fitting the model generates some statistics dependent on the `req_stats` argument of the `regress` function.
 - ``n``, ``p``, `"coefs"` and `"see"` are always computed
-- `"mse"`, `"sst"`, `"rmse"`, `"aic"`,  `"sigma"`, `"t_statistic"`, `"vif"`, `"r2"`, `"adjr2"`, `"stderror"`, `"t_values"`, `"p_values"`, `"ci"`,  are computed upon request.
+- `"mse"`, `"sst"`, `"rmse"`, `"aic"`,  `"sigma"`, `"t_statistic"`, `"vif"`, `"r2"`, `"adjr2"`, `"stderror"`, `"t_values"`, `"p_values"`, `"ci"`, `"press"`, and `"cond"` are computed upon request.
   - some diagnostics can be requested as well. Here is the full list as Symbols `[:diag_normality, :diag_ks, :diag_ad, :diag_jb, :diag_heteroskedasticity, :diag_white, :diag_bp ]`, `"diag_normality"` is a shortcut for `[:diag_ks, :diag_ad, :diag_jb]` and `:diag_heteroskedasticity` is a shortcut for `[:diag_white, :diag_bp]`. 
 - "default", includes the mandatory stats, and some of the optional statistics here as Symbols: `[:coefs, :sse, :mse, :sst, :rmse, :sigma, :t_statistic, :r2, :adjr2, :stderror, :t_values, :p_values, :ci]`
 - `"all"` includes all availble statistics
@@ -93,8 +93,11 @@ Variance inflation factor (VIF) is calculated by taking the diagonal elements of
 #### PRESS predicted residual error sum of squares
 The predicted residual error sum of squares is calculated by taking the sum of squares from the `PRESS` (see below the statistics related to predictions) of each observations. 
 
+#### Condition number (cond)
+The condition number of the design matrix is computed using the function `cond` from `LinearAlgebra`. it give some information indicating how severly ill-condition the problem is. See [Wikipedia page](https://en.wikipedia.org/wiki/Condition_number) and [Julia documentation](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#LinearAlgebra.cond) for more information.
+
 ### Robust covariance estimators
-Robust Covariance estimator can be requested through the ```cov``` argument of the ```regress``` function.
+Robust Covariance estimator can be requested through the `cov` argument of the `regress` function.
 The options are (as Symbols):
 - `:white`: Heteroscedasticity 
 - `:hc0`: Heteroscedasticity
@@ -253,6 +256,14 @@ When there is an intercept in the model the `pcorr1` and `pcorr2` are considered
 \textup{scorr2} = \frac{\textup{Type 2 SS}}{\textup{SST}}
 ```
 When there is an intercept in the model the `scorr1` and `scorr2` are considered `missing` for the intercept.
+
+### Ridge Regression and Weighthed Ridge Regression
+Ridge regression and weighthed ridge regression are possible using the `ridge` functions however please not that only the following statistics are available: `MSE`, `RMSE`, `R2`, `ADJR2`, and `VIF`.
+The ridge constant `k` can be specified as scalar or as a range (`AbstractRange`).
+The coefficients calculation is inspired  by the details given in [SAS blog post](https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html).
+
+>Let ``X`` be the matrix of the independent variables after centering [and scaling]the data, and let ``Y`` be a vector corresponding to the [centered]dependent variable. Let ``D`` be a diagonal matrix with diagonal elements as in ``X`X``. The ridge regression estimate corresponding to the ridge constant k can be computed as ``D^{-1/2} * (Z^{T}Z + k*I)^{-1} * Z^{T}Y ``.
+
 
 ### General remarks
 For all options and parameters they can be passed as a `Vector{String}` or a `Vector{Symbol}` or alternatively if only options is needed as a single `String` or `Symbol`. For instance `"all"`, `:all` or `["R2", "VIF"]` or `[:r2, :vif]`. 

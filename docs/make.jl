@@ -9,7 +9,8 @@ makedocs(sitename="LinearRegressionKit.jl", modules = [LinearRegressionKit] ,
         "Tutorials" => Any[
             "Basic" => "basic_tutorial.md",
             "Multiple regression" => "multi_tutorial.md",
-            "Weighted regression" => "weighted_regression_tutorial.md" ]
+            "Weighted regression" => "weighted_regression_tutorial.md",
+            "Ridge regression" => "ridge_regression_tutorial.md" ]
     ])
 
 deploydocs(

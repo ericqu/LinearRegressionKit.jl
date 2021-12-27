@@ -120,7 +120,7 @@ end
     wanted = ["all"]
     needed = Set([:coefs, :sse, :mse, :sst, :rmse, :aic, :sigma, :t_statistic, :vif, :r2, :adjr2, :stderror, :t_values, :p_values, :ci,
                     :diag_normality, :diag_ks, :diag_ad, :diag_jb, :diag_heteroskedasticity, :diag_white, :diag_bp, :press, 
-                    :t1ss, :t2ss, :pcorr1, :pcorr2, :scorr1, :scorr2])
+                    :t1ss, :t2ss, :pcorr1, :pcorr2, :scorr1, :scorr2, :cond])
     @test needed == get_needed_model_stats(wanted)
     wanted = [ ]
     needed = Set([:coefs, :mse, :sse])
@@ -148,6 +148,9 @@ end
     @test needed == get_needed_model_stats(wanted)
     wanted = [ "bogus"]
     needed = Set([:coefs, :mse, :sse])
+    @test needed == get_needed_model_stats(wanted)
+    wanted = [ "cond"]
+    needed = Set([:coefs, :mse, :sse, :cond])
     @test needed == get_needed_model_stats(wanted)
     wanted = ["stderror", "Bogus"]
     needed = Set([:coefs, :mse, :sse, :stderror, :sigma])

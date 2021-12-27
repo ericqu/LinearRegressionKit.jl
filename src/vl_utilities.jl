@@ -251,3 +251,69 @@ function leverage_plot!(all_plots, results, lm, plot_args)
     all_plots["leverage"] = p
 end
 
+function escape_javascript!(vec)
+    for i in 1:length(vec)
+        vec[i] = replace(vec[i], "&"=>" ampersand ")
+    end
+end
+
+function ridge_traceplots(rdf::AbstractDataFrame; width=400)
+    nb_coefs = round(Int, (ncol(rdf) - 5) / 2)
+    dfstats = names(rdf)[2:5]
+    dfcoefs = nothing
+    dfvifs = nothing
+
+    all_names = names(rdf)
+    escape_javascript!(all_names)
+
+    if all_names[6] == "(Intercept)"
+        dfcoefs = all_names[7:6 - 1 + nb_coefs]
+        push!(dfcoefs, "(Intercept)")
+        dfvifs = all_names[end - nb_coefs + 2:end]
+    else
+        dfcoefs = all_names[6:6 - 1 + nb_coefs]
+        dfvifs = all_names[end - nb_coefs + 2:end]
+    end
+
+    traceplot = rdf |> @vlplot(title = "Ridge trace plot", width = width, height = width,
+        transform = [
+            {fold = dfcoefs},
+        ],
+        mark = :line,
+        x = {field = :k , type = :quantitative, scale = {zero = false}, axis = { grid = false}} ,
+        y = {field = :value, type = :quantitative, scale = {zero = false}, axis = { grid = false}},
+        color = {field = :key, type = :nominal},
+        )
+
+    viftraceplot = rdf |> @vlplot(title = "VIF trace plot", width = width, height = width,
+        transform = [
+            {fold = dfvifs},
+        ],
+        mark = :line,
+        x = {field = :k, type = :quantitative, scale = {zero = false}, axis = { grid = false}} ,
+        y = {field = :value, type = :quantitative, scale = {type = :linear, zero = false}, axis = { grid = false} },
+        color = {field = :key, type = :nominal},
+        ) 
+
+    viftraceplotlog = rdf |> @vlplot(title = "VIF trace plot", width = width, height = width,
+        transform = [
+            {fold = dfvifs},
+        ],
+        mark = :line,
+        x = {field = :k, type = :quantitative, scale = {zero = false}, axis = { grid = false}} ,
+        y = {field = :value, type = :quantitative, scale = {type = :log, zero = false}, axis = { grid = false} },
+        color = {field = :key, type = :nominal},
+        ) 
+
+    rmse_r2_plot = select(rdf, ["k", "RMSE", "R2"]) |> @vlplot(title = "Trace plot", width = width, height = width,
+        transform = [
+            {fold = ["RMSE", "R2"]},
+        ],
+        mark = :line,
+        x = {field = :k, type = :quantitative, scale = {zero = false}, axis = { grid = false}} ,
+        y = {field = :value, type = :quantitative, scale = {zero = false}, axis = { grid = false}},
+        color = {field = :key, type = :nominal},
+    )
+
+    return Dict([("coefs traceplot", traceplot), ("vifs traceplot", viftraceplot), ("vifs traceplot log", viftraceplotlog), ("rmse r2 plot", rmse_r2_plot)])
+end
