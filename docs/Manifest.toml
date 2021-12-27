@@ -433,9 +433,9 @@ version = "0.3.0+0"
 
 [[Roots]]
 deps = ["CommonSolve", "Printf", "Setfield"]
-git-tree-sha1 = "51ee572776905ee34c0568f5efe035d44bf59f74"
+git-tree-sha1 = "ee885e0f773804f046fd43d0d4ace305b3d540e2"
 uuid = "f2b01f46-fcfa-551c-844a-d8ac1e96c665"
-version = "1.3.11"
+version = "1.3.13"
 
 [[SHA]]
 uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
