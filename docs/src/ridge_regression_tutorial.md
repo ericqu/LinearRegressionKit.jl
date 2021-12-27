@@ -44,8 +44,26 @@ Here is the default trace plot for the coefficients:
 ```@example ridgeregression
 ps["coefs traceplot"]
 ```
+!!! note
+    It is an issue that the `&` in the variable names are replaced by ` ampersand ` because otherwise it would cause issue either on the web display or on the SVG display. This only affect the plot generate with the library. One can directly use the DataFrame to generate its own plots. 
 
 And here is the default trace plot for the VIFs:
 ```@example ridgeregression
 ps["vifs traceplot"]
+```
+
+As it is difficult to see the VIFs traces, it is also possible to request the version of hte plot with the y-axis log scaled.
+```@example ridgeregression
+ps["vifs traceplot log"]
+```
+
+Once a `k` has been selected (in this case 0.004) a regular ridge regression with this value can executed.
+```@example ridgeregression
+rlm = ridge(f, df, 0.004)
+```
+
+From there the regular `predict_*` functions can be used, although only the `predicted` and potentially the `residuals` statistics will be calculated.
+
+```@example ridgeregression
+res = predict_in_sample(rlm, df)
 ```

@@ -59,7 +59,7 @@ function ridge(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame, ks:
     end
 
     coefs_names = encapsulate_string(string.(StatsBase.coefnames(updatedformula.rhs)))
-    vifs_names = "vif_" .* coefs_names
+    vifs_names = "vif " .* coefs_names
     cv = [ks vmse vrmse vr2 vadjr2 transpose(hcat(vcoefs...)) transpose(hcat(vvifs...)) ]
     all_names = ["k", "MSE", "RMSE", "R2", "ADJR2", coefs_names..., vifs_names... ]
     df = DataFrame(cv, all_names)
@@ -231,7 +231,7 @@ function Base.show(io::IO, rr::ridgeRegRes)
     else
         println(io, "Ridge Regression")
     end
-    println(io, "Lambda (k):\t", rr.k)
+    println(io, "Constant k:\t", rr.k)
     println(io, "Model definition:\t", rr.modelformula)
     println(io, "Used observations:\t", rr.observations)
     println(io, "Model statistics:")

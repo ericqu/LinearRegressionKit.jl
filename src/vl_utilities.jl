@@ -252,8 +252,8 @@ function leverage_plot!(all_plots, results, lm, plot_args)
 end
 
 function escape_javascript!(vec)
-    for i in length(vec)
-        vec[i] = replace(vec[i], "&"=>"&amp;")
+    for i in 1:length(vec)
+        vec[i] = replace(vec[i], "&"=>" ampersand ")
     end
 end
 
@@ -264,17 +264,15 @@ function ridge_traceplots(rdf::AbstractDataFrame; width=400)
     dfvifs = nothing
 
     all_names = names(rdf)
-    @show(all_names)
     escape_javascript!(all_names)
-    @show(all_names)
 
-    if names(rdf)[6] == "(Intercept)"
-        dfcoefs = names(rdf)[7:6 - 1 + nb_coefs]
+    if all_names[6] == "(Intercept)"
+        dfcoefs = all_names[7:6 - 1 + nb_coefs]
         push!(dfcoefs, "(Intercept)")
-        dfvifs = names(rdf)[end - nb_coefs + 2:end]
+        dfvifs = all_names[end - nb_coefs + 2:end]
     else
-        dfcoefs = names(rdf)[6:6 - 1 + nb_coefs]
-        dfvifs = names(rdf)[end - nb_coefs + 2:end]
+        dfcoefs = all_names[6:6 - 1 + nb_coefs]
+        dfvifs = all_names[end - nb_coefs + 2:end]
     end
 
     traceplot = rdf |> @vlplot(title = "Ridge trace plot", width = width, height = width,
