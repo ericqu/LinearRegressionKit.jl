@@ -252,4 +252,4 @@ x ^ 3         │     1.04075    0.0129463      80.3897  5.60424e-92      1.0150
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
 ## Notable changes since version 0.73
-- Addition of Ridge regression
+- Addition of Ridge regression 

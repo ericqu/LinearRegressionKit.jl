@@ -33,7 +33,7 @@ We observe that the VIF for the coefficients are highs, and hence indicate likel
 
 ### Ridge regression
 
-Ridge regression requires a parameter (k), while there are method to numerically suggest a k. It is also possible to trace the coefficients and VIFs values to let the analyst choose a k. Here we are going to trace for the k between 0. and 0.1 by increment of 0.0005. We display only the results for the first 5 k.
+Ridge regression requires a parameter (k), while there are methods to numerically identify k. It is also possible to trace the coefficients and VIFs values to let the analyst choose a k. Here we are going to trace for the k between 0.0 and 0.1 by increment of 0.0005. We display only the results for the first 5 k.
 
 ```@example ridgeregression
 rdf, ps = ridge(f, df, 0.0:0.0005:0.1, traceplots=true)
