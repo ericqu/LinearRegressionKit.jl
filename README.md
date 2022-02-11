@@ -126,9 +126,9 @@ vdf = DataFrame(y=ys, x=xs)
 Then we can make the first model and look at the results:
 
 ```julia 
-lr, ps = regress(@formula(y ~ 1 + x^3 ), vdf, "all", 
+lr, ps = regress(@formula(y ~ 1 + x), vdf, "all", 
     req_stats=["default", "vif", "AIC"], 
-    plot_args=Dict("plot_width" => 200 ))
+    plot_args=Dict("plot_width" => 200))
 lr
 ```
 ```
