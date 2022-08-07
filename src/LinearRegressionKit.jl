@@ -1,6 +1,6 @@
 module LinearRegressionKit
 
-export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge, ridgeRegRes
+export regress, predict_in_sample, predict_out_of_sample, linRegRes, kfold, ridge, ridgeRegRes, sweep_linreg
 
 using Base: Tuple, Int64, Float64, Bool
 using StatsBase:eltype, isapprox, length, coefnames, push!, append!
@@ -444,8 +444,8 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; Î
         finally
             check_cardinality(copieddf, updatedformula)
     end
-    coefs = xytxy[1:p, end]
-    mse = xytxy[p + 1, p + 1] / (n - p)
+    coefs = xytxy'[1:p, end]
+    mse = xytxy'[p + 1, p + 1] / (n - p)
 
     if :sst in needed_stats
         if isweighted
@@ -488,7 +488,7 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; Î
         vector_stats[:scorr2] = get_scorr(vector_stats[:t2ss], scalar_stats[:sst], intercept)
     end
     if :stderror in needed_stats
-        vector_stats[:stderror] = real_sqrt.(diag(mse * @view(xytxy[1:end - 1, 1:end - 1])))
+        vector_stats[:stderror] = real_sqrt.(diag(mse * @view(xytxy'[1:end - 1, 1:end - 1])))
     end
     if :t_values in needed_stats
         vector_stats[:t_values] = coefs ./ vector_stats[:stderror]
@@ -559,7 +559,7 @@ if length(needed_white) > 0 || length(needed_hac) > 0 || :press in needed_stats
             if t in white_types
                 continue
             end
-            cur_type, cur_std = heteroscedasticity(t, x, y, residuals, n, p, xytxy)
+            cur_type, cur_std = heteroscedasticity(t, x, y, residuals, n, p, xytxy')
             push!(white_types, cur_type)
             push!(white_stds, cur_std)
 
@@ -625,7 +625,7 @@ if length(needed_white) > 0 || length(needed_hac) > 0 || :press in needed_stats
 
 end
 
-    sres = linRegRes(xytxy, coefs, 
+    sres = linRegRes(xytxy', coefs, 
         white_types, hac_types,
         get(vector_stats, :stderror, nothing), white_stds, hac_stds, 
         get(vector_stats, :t_values, nothing), white_t_vals, hac_t_vals,
