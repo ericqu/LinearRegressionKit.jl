@@ -45,9 +45,9 @@ x             │     27.6201      1.66699      16.5688  2.41337e-12      24.117
 # Contrasts with Julia Stats GLM package
 First, the GLM package provides more than linear regression with Ordinary Least-Squares through the Generalized Linear Model with Maximum Likelihood Estimation.
 
-LinearRegressionKit now accept model without intercept. Like models made with GLM the intercept is implicit, and to enable the no intercept the user must specify it in the formula (for instance ```y  ~ 0 + x```).
+LinearRegressionKit accepts model without intercept. Like models made with GLM the intercept is implicit, and to enable the no intercept the user must specify it in the formula (for instance ```y  ~ 0 + x```).
 
-LinearRegressionKit now supports analytical weights; GLM supports frequency weights.
+LinearRegressionKit supports analytical weights; GLM supports frequency weights.
 
 Both LinearRegressionKit and GLM rely on StatsModels.jl for the model's description (@formula); hence it is easy to move between the two packages. Similarly, contrasts and categorical variables are defined in the same way facilitating moving from one to the other when needed.
 
@@ -251,5 +251,6 @@ x ^ 3         │     1.04075    0.0129463      80.3897  5.60424e-92      1.0150
 
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
-## Notable changes since version 0.73
-- Addition of Ridge regression 
+## Notable changes since version 0.74
+- The Sweep operator algorithm has been modified to work with column major. This should gives a performance boost.
+- The ```sweep_linreg``` function is now exported if one would like to do the linear regression with alreadz prepared design matrix. Although this gives back only the coefficients from the regression.
