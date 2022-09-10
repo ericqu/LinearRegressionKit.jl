@@ -254,3 +254,4 @@ Finally if you would like more examples I encourage you to go to the documentati
 ## Notable changes since version 0.74
 - The Sweep operator algorithm has been modified to work with column major. This should gives a performance boost.
 - The ```sweep_linreg``` function is now exported if one would like to do the linear regression with alreadz prepared design matrix. Although this gives back only the coefficients from the regression.
+- fix the White and Breusch-Pagan test description. 
