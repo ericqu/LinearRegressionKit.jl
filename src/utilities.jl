@@ -349,7 +349,7 @@ function present_breusch_pagan_test(X, residuals, α)
     bpt = HypothesisTests.BreuschPaganTest(X, residuals)
     pval = pvalue(bpt)
     alpha_value= round((1 - α)*100, digits=3)
-    topresent = string("Breush-Pagan Test (heteroskedasticity of residuals):\n  T*R² statistic: $(round(bpt.lm, sigdigits=6))    degrees of freedom: $(round(bpt.dof, digits=6))    p-value: $(round(pval, digits=6))\n")
+    topresent = string("Breush-Pagan Test (homoskedasticity of residuals):\n  T*R² statistic: $(round(bpt.lm, sigdigits=6))    degrees of freedom: $(round(bpt.dof, digits=6))    p-value: $(round(pval, digits=6))\n")
     if pval > α
         topresent *= "  with $(alpha_value)% confidence: fail to reject null hyposthesis.\n"
     else 
@@ -362,7 +362,7 @@ function present_white_test(X, residuals, α)
     bpt = HypothesisTests.WhiteTest(X, residuals)
     pval = pvalue(bpt)
     alpha_value= round((1 - α)*100, digits=3)
-    topresent = string("White Test (heteroskedasticity of residuals):\n  T*R² statistic: $(round(bpt.lm, sigdigits=6))    degrees of freedom: $(round(bpt.dof, digits=6))    p-value: $(round(pval, digits=6))\n")
+    topresent = string("White Test (homoskedasticity of residuals):\n  T*R² statistic: $(round(bpt.lm, sigdigits=6))    degrees of freedom: $(round(bpt.dof, digits=6))    p-value: $(round(pval, digits=6))\n")
     if pval > α
         topresent *= "  with $(alpha_value)% confidence: fail to reject null hyposthesis.\n"
     else 
