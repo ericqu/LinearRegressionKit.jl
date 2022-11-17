@@ -143,6 +143,9 @@ function Base.show(io::IO, lr::linRegRes)
                 lr.Type1SS, lr.Type2SS, lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
             deepcopy(vec_stats_title), 
             lr.updformula)
+        if !isnothing(r_signif_codes)
+            @printf(io, "\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+        end
     end
 
     if length(lr.white_types) > 0
@@ -158,6 +161,9 @@ function Base.show(io::IO, lr::linRegRes)
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
                 deepcopy(vec_stats_title), 
                 lr.updformula)
+            if !isnothing(r_signif_codes)
+                @printf(io, "\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+            end        
         end
     end
 
@@ -174,6 +180,9 @@ function Base.show(io::IO, lr::linRegRes)
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
                 deepcopy(vec_stats_title), 
                 lr.updformula)
+            if !isnothing(r_signif_codes)
+                @printf(io, "\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+            end    
         end
     end
 
