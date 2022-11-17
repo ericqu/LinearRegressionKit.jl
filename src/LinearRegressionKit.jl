@@ -135,7 +135,7 @@ function Base.show(io::IO, lr::linRegRes)
         helper_print_table(io, "Coefficients statistics:", 
             [lr.coefs, lr.stderrors, lr.t_values, lr.p_values, lr.ci_low, lr.ci_up, lr.VIF, 
                 lr.Type1SS, lr.Type2SS, lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-            vec_stats_title, 
+            deepcopy(vec_stats_title), 
             lr.updformula)
     end
 
@@ -145,7 +145,7 @@ function Base.show(io::IO, lr::linRegRes)
                 [lr.coefs, lr.white_stderrors[cur_i], lr.white_t_values[cur_i], lr.white_p_values[cur_i], 
                     lr.white_ci_low[cur_i], lr.white_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-                vec_stats_title, 
+                deepcopy(vec_stats_title), 
                 lr.updformula)
         end
     end
@@ -156,7 +156,7 @@ function Base.show(io::IO, lr::linRegRes)
                 [lr.coefs, lr.hac_stderrors[cur_i], lr.hac_t_values[cur_i], lr.hac_p_values[cur_i], 
                     lr.hac_ci_low[cur_i], lr.hac_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-                vec_stats_title, 
+                deepcopy(vec_stats_title)e, 
                 lr.updformula)
         end
     end
