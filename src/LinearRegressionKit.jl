@@ -127,11 +127,11 @@ function Base.show(io::IO, lr::linRegRes)
         @printf(io, "Confidence interval: %g%%\n", (1 - lr.alpha) * 100 )
     end
 
-    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "sig_code", "low ci", "high ci", "VIF", 
+    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "code", "low ci", "high ci", "VIF", 
             "Type1 SS", "Type2 SS", "PCorr1", "PCorr2", 
             "SCorr1", "SCorr2"]
             
-    r_signif_codes::Union{Nothing,Vector} = nothing 
+    r_signif_codes::Union{Nothing,Vector{String}} = nothing 
     if length(lr.white_types) + length(lr.hac_types) == 0
         r_signif_codes = nothing 
         if !isnothing(lr.p_values)
