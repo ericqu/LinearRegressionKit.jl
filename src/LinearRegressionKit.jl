@@ -181,7 +181,7 @@ function Base.show(io::IO, lr::linRegRes)
                 deepcopy(vec_stats_title), 
                 lr.updformula)
             if !isnothing(r_signif_codes)
-                @printf(io, "\n\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1")
+                @printf(io, "\n\n\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
             end    
         end
     end
