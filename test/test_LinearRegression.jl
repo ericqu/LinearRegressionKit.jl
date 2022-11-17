@@ -20,7 +20,7 @@
     @test isapprox(lm1.Type1SS, [1.2576681666666665, 0.3135496333333334])
     @test isapprox(lm1.Type2SS, [3.152636815919868e-5, 0.31354963333333363])
     @test isapprox(lm1.f_value, 4191.84)
-    @test leaq(0.001, lm1.f_pvalue)
+    @test leaq(lm1.f_pvalue, 0.001)
 end
 
 @testset "from glm regresspredict" begin 

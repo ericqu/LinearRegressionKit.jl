@@ -505,15 +505,15 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; Î
         vector_stats[:p_values] = ccdf.(Ref(FDist(1., (n - p))), abs2.(vector_stats[:t_values]))
     end
     if :f_stats in needed_stats
-        model_df = p - 1
+        dof_model = p - 1
         if !intercept
-            model_df = p
+            dof_model = p
         end
         ssmodel = scalar_stats[:sst] - sse 
-        scalar_stats[:f_value] = ssmodel / model_df / mse
-        scalar_stats[:f_pvalue] = ccdf.(Ref(FDist(model_df, n - model_df)), scalar_stats[:f_value])
-        scalar_stats[:dof_model] = model_df
-        scalar_stats[:dof_error] = n - model_df        
+        scalar_stats[:f_value] = ssmodel / dof_model / mse
+        scalar_stats[:dof_model] = dof_model
+        scalar_stats[:dof_error] = n - 1 - dof_model        
+        scalar_stats[:f_pvalue] = ccdf.(Ref(FDist(dof_model, n - 1 - dof_model)), scalar_stats[:f_value])
     end
     if :ci in needed_stats
         vector_stats[:ci] = vector_stats[:stderror] * scalar_stats[:t_statistic]
