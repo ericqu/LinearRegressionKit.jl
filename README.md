@@ -240,6 +240,7 @@ Used observations:      101
 Model statistics:
   R²: 0.979585                  Adjusted R²: 0.979379
   MSE: 466.724                  RMSE: 21.6038
+  F Value: 4.87628e+06 with degrees of freedom 1 and 9999, Pr > F (p-value): 0
 Confidence interval: 95%
 
 White's covariance estimator (HC3):
@@ -257,7 +258,5 @@ x ^ 3         │     1.04075    0.0129463      80.3897  5.60424e-92      1.0150
 
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
-## Notable changes since version 0.74
-- The Sweep operator algorithm has been modified to work with column major. This should gives a performance boost.
-- The ```sweep_linreg``` function is now exported if one would like to do the linear regression with alreadz prepared design matrix. Although this gives back only the coefficients from the regression.
-- fix the White and Breusch-Pagan test description. 
+## Notable changes since version 0.76
+- Added the F Value (F Statistics) as a default statistic computed when a model is fitted.
