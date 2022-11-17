@@ -69,7 +69,7 @@ end
 """
 get_all_model_stats() = Set([:coefs, :sse, :mse, :sst, :rmse, :aic, :sigma, :t_statistic, :vif, :r2, :adjr2, :stderror, :t_values, :p_values, :ci,
                             :diag_normality, :diag_ks, :diag_ad, :diag_jb, :diag_heteroskedasticity, :diag_white, :diag_bp, :press, 
-                            :t1ss, :t2ss, :pcorr1, :pcorr2 , :scorr1, :scorr2, :cond ])
+                            :t1ss, :t2ss, :pcorr1, :pcorr2 , :scorr1, :scorr2, :cond, :f_stats ])
 
 get_needed_model_stats(req_stats::String) = return get_needed_model_stats([req_stats])
 get_needed_model_stats(req_stats::Symbol) = return get_needed_model_stats(Set([req_stats]))
@@ -85,7 +85,8 @@ get_needed_model_stats(req_stats::Set{Symbol}) = get_needed_model_stats(collect(
 """
 function get_needed_model_stats(req_stats::Vector{Symbol})
     needed = Set([:coefs, :sse, :mse])
-    default = Set([:coefs, :sse, :mse, :sst, :rmse, :sigma, :t_statistic, :r2, :adjr2, :stderror, :t_values, :p_values, :ci])
+    default = Set([:coefs, :sse, :mse, :sst, :rmse, :sigma, :t_statistic, :r2, :adjr2, :stderror, :t_values, :p_values,
+            :ci, :f_stats])
     full = get_all_model_stats()
     unique!(req_stats)
 
@@ -110,7 +111,13 @@ function get_needed_model_stats(req_stats::Vector{Symbol})
     :diag_white in req_stats && push!(needed, :diag_white)
     :diag_bp in req_stats && push!(needed, :diag_bp)
     :cond in req_stats && push!(needed, :cond)
+    # :f_stats in req_stats && push!(needed, :sst)
+    # :f_stats in req_stats && push!(needed, :f_stats)
 
+    if :f_stats in req_stats
+        push!(needed, :sst)
+        push!(needed, :f_stats)
+    end
     if :diag_normality in req_stats
         push!(needed, :diag_ks)
         push!(needed, :diag_ad)
