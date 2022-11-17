@@ -3,7 +3,7 @@ using Test, DataFrames, StatsModels
 
 leaq(a,b) = (a <= b) || (a ≈ b)
 
-include("test_noint.jl")
+# include("test_noint.jl")
 
 include("test_sweep_operator.jl")
 include("test_utilities.jl")
