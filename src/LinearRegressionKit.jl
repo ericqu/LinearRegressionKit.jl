@@ -510,7 +510,7 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; Î
         if !intercept
             dof_model = p
             dof_error = n -dof_model
-        end
+        end 
         ssmodel = scalar_stats[:sst] - sse 
         scalar_stats[:f_value] = ssmodel / dof_model / mse
         scalar_stats[:dof_model] = dof_model
