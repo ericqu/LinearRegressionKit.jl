@@ -33,6 +33,7 @@ Model statistics:
   R²: 0.938467                  Adjusted R²: 0.935049
   MSE: 1.01417                  RMSE: 1.00706
   σ̂²: 1.01417
+  F Value: 274.526 with degrees of freedom 1 and 18, Pr > F (p-value): 2.41337e-12
 Confidence interval: 95%
 
 Coefficients statistics:
@@ -78,6 +79,7 @@ Ridge Regression (potentially with analytical weights) is implemented in the Lin
 - Type 1 & 2 Sum of squares
 - Squared partial correlation coefficient, squared semi-partial correlation coefficient. 
 - PRESS as the sum of square of predicted residuals errors
+- F Value (SAS naming) F Statistic (R naming) is presented with its p-value
 
 ## List of Statistics about the predicted values:
 - The predicted values
@@ -139,6 +141,7 @@ Model statistics:
   R²: 0.750957                  Adjusted R²: 0.748441
   MSE: 5693.68                  RMSE: 75.4565
   σ̂²: 5693.68                   AIC: 875.338
+  F Value: 308.789 with degrees of freedom 1 and 99, Pr > F (p-value): 3.38402e-32
 Confidence interval: 95%
 
 Coefficients statistics:
@@ -172,6 +175,7 @@ Model statistics:
   R²: 0.979585                  Adjusted R²: 0.979379
   MSE: 466.724                  RMSE: 21.6038
   σ̂²: 466.724                   AIC: 622.699
+  F Value: 4969.78 with degrees of freedom 1 and 99, Pr > F (p-value): 1.98804e-86
 Confidence interval: 95%
 
 Coefficients statistics:
@@ -202,6 +206,7 @@ Model statistics:
   R²: 0.997951                  Adjusted R²: 0.997951
   MSE: 43.4392                  RMSE: 6.59084
   σ̂²: 43.4392                   AIC: 37719.4
+  F Value: 4.86953e+06 with degrees of freedom 1 and 9999, Pr > F (p-value): 0
 Confidence interval: 95%
 
 Coefficients statistics:
