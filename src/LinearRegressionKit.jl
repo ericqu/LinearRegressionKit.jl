@@ -156,7 +156,7 @@ function Base.show(io::IO, lr::linRegRes)
                 [lr.coefs, lr.hac_stderrors[cur_i], lr.hac_t_values[cur_i], lr.hac_p_values[cur_i], 
                     lr.hac_ci_low[cur_i], lr.hac_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-                deepcopy(vec_stats_title)e, 
+                deepcopy(vec_stats_title), 
                 lr.updformula)
         end
     end
