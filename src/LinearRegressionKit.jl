@@ -127,13 +127,19 @@ function Base.show(io::IO, lr::linRegRes)
         @printf(io, "Confidence interval: %g%%\n", (1 - lr.alpha) * 100 )
     end
 
-    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "low ci", "high ci", "VIF", 
+    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "sig_code", "low ci", "high ci", "VIF", 
             "Type1 SS", "Type2 SS", "PCorr1", "PCorr2", 
             "SCorr1", "SCorr2"]
-
+            
+    r_signif_codes::Union{Nothing,Vector} = nothing 
     if length(lr.white_types) + length(lr.hac_types) == 0
+        r_signif_codes = nothing 
+        if !isnothing(lr.p_values)
+            r_signif_codes = get_r_significance_code.(lr.p_values)
+        end
+
         helper_print_table(io, "Coefficients statistics:", 
-            [lr.coefs, lr.stderrors, lr.t_values, lr.p_values, lr.ci_low, lr.ci_up, lr.VIF, 
+            [lr.coefs, lr.stderrors, lr.t_values, lr.p_values, r_signif_codes, lr.ci_low, lr.ci_up, lr.VIF, 
                 lr.Type1SS, lr.Type2SS, lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
             deepcopy(vec_stats_title), 
             lr.updformula)
@@ -141,8 +147,13 @@ function Base.show(io::IO, lr::linRegRes)
 
     if length(lr.white_types) > 0
         for (cur_i, cur_type) in enumerate(lr.white_types)
+            r_signif_codes = nothing 
+            if !isnothing(lr.p_values)
+                r_signif_codes = get_r_significance_code.(lr.white_p_values[cur_i])
+            end
             helper_print_table(io, "White's covariance estimator ($(Base.Unicode.uppercase(string(cur_type)))):", 
                 [lr.coefs, lr.white_stderrors[cur_i], lr.white_t_values[cur_i], lr.white_p_values[cur_i], 
+                    r_signif_codes,
                     lr.white_ci_low[cur_i], lr.white_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
                 deepcopy(vec_stats_title), 
@@ -152,8 +163,13 @@ function Base.show(io::IO, lr::linRegRes)
 
     if length(lr.hac_types) > 0
         for (cur_i, cur_type) in enumerate(lr.hac_types)
+            r_signif_codes = nothing 
+            if !isnothing(lr.p_values)
+                r_signif_codes = get_r_significance_code.(lr.hac_p_values[cur_i])
+            end
             helper_print_table(io, "Newey-West's covariance estimator:", 
                 [lr.coefs, lr.hac_stderrors[cur_i], lr.hac_t_values[cur_i], lr.hac_p_values[cur_i], 
+                    r_signif_codes,
                     lr.hac_ci_low[cur_i], lr.hac_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
                 deepcopy(vec_stats_title), 

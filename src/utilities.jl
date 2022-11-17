@@ -447,3 +447,25 @@ function check_cardinality(df::AbstractDataFrame, f, verbose=false)
         end
     end
 end
+
+
+"""
+    get_r_significance_code(v::Real)
+
+    (internal) to transform the p value into the code used in lm (R language)
+    reference text from R: "Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1"
+
+    used exclusively to handle the function ```StatsBase.coefnames``` which sometime return an array or when there is only one element the element alone. 
+"""
+function get_r_significance_code(v::Real)
+    if v < 0.001
+        return "***"
+    elseif v < 0.01 
+        return "**"
+    elseif v < 0.05 
+        return "*"
+    elseif v < 0.1
+        return "."
+    end 
+    return " "
+end
