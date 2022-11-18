@@ -71,6 +71,10 @@ struct linRegRes
     weights::Union{Nothing,String}          # Indicates which column of the dataframe contains the analytical weights
     PRESS::Union{Nothing,Float64}           # Store the PRESS statistic
     cond::Union{Nothing,Float64}            # Store Condition number of the design matrix
+    f_value::Union{Nothing,Float64}         # Store F Value (also known as F Statistic) of the fitted model
+    f_pvalue::Union{Nothing,Float64}        # Store p_value of F Value of the fitted model
+    dof_model::Union{Nothing,Float64}       # Store degree of freedom of fitted model 
+    dof_error::Union{Nothing,Float64}       # Store degree of freedom of the error part
 end
 
 """
@@ -115,41 +119,70 @@ function Base.show(io::IO, lr::linRegRes)
         end
     end
     
+    if !isnothing(lr.f_value) 
+        @printf(io, "  F Value: %g with degrees of freedom %g and %g, Pr > F (p-value): %g\n", lr.f_value, lr.dof_model, lr.dof_error, lr.f_pvalue)
+    end
+
     if !isnothing(lr.ci_low) || !isnothing(lr.ci_up)
         @printf(io, "Confidence interval: %g%%\n", (1 - lr.alpha) * 100 )
     end
 
-    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "low ci", "high ci", "VIF", 
+    vec_stats_title = ["Coefs", "Std err", "t", "Pr(>|t|)", "code", "low ci", "high ci", "VIF", 
             "Type1 SS", "Type2 SS", "PCorr1", "PCorr2", 
             "SCorr1", "SCorr2"]
-
+            
+    r_signif_codes::Union{Nothing,Vector{String}} = nothing 
     if length(lr.white_types) + length(lr.hac_types) == 0
+        r_signif_codes = nothing 
+        if !isnothing(lr.p_values)
+            r_signif_codes = get_r_significance_code.(lr.p_values)
+        end
+
         helper_print_table(io, "Coefficients statistics:", 
-            [lr.coefs, lr.stderrors, lr.t_values, lr.p_values, lr.ci_low, lr.ci_up, lr.VIF, 
+            [lr.coefs, lr.stderrors, lr.t_values, lr.p_values, r_signif_codes, lr.ci_low, lr.ci_up, lr.VIF, 
                 lr.Type1SS, lr.Type2SS, lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-            vec_stats_title, 
+            deepcopy(vec_stats_title), 
             lr.updformula)
+        if !isnothing(r_signif_codes)
+            @printf(io, "\n\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
+        end
     end
 
     if length(lr.white_types) > 0
         for (cur_i, cur_type) in enumerate(lr.white_types)
+            r_signif_codes = nothing 
+            if !isnothing(lr.p_values)
+                r_signif_codes = get_r_significance_code.(lr.white_p_values[cur_i])
+            end
             helper_print_table(io, "White's covariance estimator ($(Base.Unicode.uppercase(string(cur_type)))):", 
                 [lr.coefs, lr.white_stderrors[cur_i], lr.white_t_values[cur_i], lr.white_p_values[cur_i], 
+                    r_signif_codes,
                     lr.white_ci_low[cur_i], lr.white_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-                vec_stats_title, 
+                deepcopy(vec_stats_title), 
                 lr.updformula)
+            if !isnothing(r_signif_codes)
+                @printf(io, "\n\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
+            end        
         end
     end
 
     if length(lr.hac_types) > 0
         for (cur_i, cur_type) in enumerate(lr.hac_types)
+            r_signif_codes = nothing 
+            if !isnothing(lr.p_values)
+                r_signif_codes = get_r_significance_code.(lr.hac_p_values[cur_i])
+            end
             helper_print_table(io, "Newey-West's covariance estimator:", 
                 [lr.coefs, lr.hac_stderrors[cur_i], lr.hac_t_values[cur_i], lr.hac_p_values[cur_i], 
+                    r_signif_codes,
                     lr.hac_ci_low[cur_i], lr.hac_ci_up[cur_i], lr.VIF, lr.Type1SS, lr.Type2SS, 
                     lr.pcorr1, lr.pcorr2, lr.scorr1, lr.scorr2],
-                vec_stats_title, 
+                deepcopy(vec_stats_title), 
                 lr.updformula)
+            if !isnothing(r_signif_codes)
+                @printf(io, "\n\tSignif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1\n")
+            end    
         end
     end
 
@@ -496,6 +529,19 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; �
     if :p_values in needed_stats
         vector_stats[:p_values] = ccdf.(Ref(FDist(1., (n - p))), abs2.(vector_stats[:t_values]))
     end
+    if :f_stats in needed_stats
+        dof_model = p - 1
+        dof_error = n - 1 - dof_model
+        if !intercept
+            dof_model = p
+            dof_error = n -dof_model
+        end 
+        ssmodel = scalar_stats[:sst] - sse 
+        scalar_stats[:f_value] = ssmodel / dof_model / mse
+        scalar_stats[:dof_model] = dof_model
+        scalar_stats[:dof_error] = dof_error        
+        scalar_stats[:f_pvalue] = ccdf.(Ref(FDist(dof_model, dof_error)), scalar_stats[:f_value])
+    end
     if :ci in needed_stats
         vector_stats[:ci] = vector_stats[:stderror] * scalar_stats[:t_statistic]
     end
@@ -644,7 +690,11 @@ end
         get(diag_stats, :diag_ks, nothing), get(diag_stats, :diag_ad, nothing), get(diag_stats, :diag_jb, nothing),
         get(diag_stats, :diag_white, nothing),  get(diag_stats, :diag_bp, nothing),
         isweighted, weights, get(scalar_stats, :press, nothing),
-        get(scalar_stats, :cond, nothing)
+        get(scalar_stats, :cond, nothing), 
+        get(scalar_stats, :f_value, nothing), # F value
+        get(scalar_stats, :f_pvalue, nothing), # p_value of F Value 
+        get(scalar_stats, :dof_model, nothing), # degree of freedom (model)
+        get(scalar_stats, :dof_error, nothing), # degree of freedome (error)
         )
     
     return sres

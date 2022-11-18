@@ -33,13 +33,16 @@ Model statistics:
   R²: 0.938467                  Adjusted R²: 0.935049
   MSE: 1.01417                  RMSE: 1.00706
   σ̂²: 1.01417
+  F Value: 274.526 with degrees of freedom 1 and 18, Pr > F (p-value): 2.41337e-12
 Confidence interval: 95%
 
 Coefficients statistics:
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci
-──────────────┼─────────────────────────────────────────────────────────────────────────────
-(Intercept)   │    -2.44811     0.819131     -2.98867     0.007877     -4.16904    -0.727184
-x             │     27.6201      1.66699      16.5688  2.41337e-12      24.1179      31.1223
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci
+──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │    -2.44811     0.819131     -2.98867     0.007877          **      -4.16904    -0.727184
+x             │     27.6201      1.66699      16.5688  2.41337e-12         ***       24.1179      31.1223
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 # Contrasts with Julia Stats GLM package
@@ -78,6 +81,7 @@ Ridge Regression (potentially with analytical weights) is implemented in the Lin
 - Type 1 & 2 Sum of squares
 - Squared partial correlation coefficient, squared semi-partial correlation coefficient. 
 - PRESS as the sum of square of predicted residuals errors
+- F Value (SAS naming) F Statistic (R naming) is presented with its p-value
 
 ## List of Statistics about the predicted values:
 - The predicted values
@@ -106,6 +110,7 @@ Please post your questions, feedabck or issues in the Issues tabs. As much as po
 - http://hua-zhou.github.io/teaching/biostatm280-2019spring/slides/12-sweep/sweep.html
 - https://github.com/mcreel/Econometrics for the Newey-West implementation
 - https://blogs.sas.com/content/iml/2013/03/20/compute-ridge-regression.html
+- Code from StatsModels https://github.com/JuliaStats/StatsModels.jl/blob/master/test/extension.jl (in December 2021)
 
 # Examples
 
@@ -135,24 +140,27 @@ lr
 Model definition:       y ~ 1 + x
 Used observations:      101
 Model statistics:
-  R²: 0.750957                  Adjusted R²: 0.748441
-  MSE: 5693.68                  RMSE: 75.4565
-  σ̂²: 5693.68                   AIC: 875.338
+  R²: 0.758985                  Adjusted R²: 0.75655
+  MSE: 5660.28                  RMSE: 75.2348
+  σ̂²: 5660.28                   AIC: 874.744
+  F Value: 311.762 with degrees of freedom 1 and 99, Pr > F (p-value): 2.35916e-32
 Confidence interval: 95%
 
 Coefficients statistics:
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci          VIF
-──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
-(Intercept)   │    -24.5318      10.7732     -2.27711    0.0249316     -45.9082     -3.15535          0.0
-x             │     44.4953      2.57529      17.2778  1.20063e-31      39.3854      49.6052          1.0
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci          VIF
+──────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │    -26.6547      10.7416     -2.48145    0.0147695           *      -47.9683     -5.34109          0.0
+x             │     45.3378      2.56773      17.6568  2.35916e-32         ***       40.2429      50.4327          1.0
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
-This is pretty good, so let's further review some diagnostic plots.
+This is okay, so let's further review some diagnostic plots.
 
 ```julia
 [[ps["fit"] ps["residuals"]]
     [ps["histogram density"] ps["qq plot"]]]
 ```
-![Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_01.svg "Overview Plots")
+![Illustrative Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_01.svg "Illustrative Overview Plots")
 
 Please note that for the fit plot, the orange line shows the regression line, in dark grey the confidence interval for the mean, and in light grey the interval for the individuals predictions.
 
@@ -168,18 +176,21 @@ Giving:
 Model definition:       y ~ 1 + :(x ^ 3)
 Used observations:      101
 Model statistics:
-  R²: 0.979585                  Adjusted R²: 0.979379
-  MSE: 466.724                  RMSE: 21.6038
-  σ̂²: 466.724                   AIC: 622.699
+  R²: 0.984023                  Adjusted R²: 0.983861
+  MSE: 375.233                  RMSE: 19.3709
+  σ̂²: 375.233                   AIC: 600.662
+  F Value: 6097.23 with degrees of freedom 1 and 99, Pr > F (p-value): 9.55196e-91
 Confidence interval: 95%
 
 Coefficients statistics:
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci          VIF
-──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
-(Intercept)   │     1.23626      2.65774     0.465157     0.642841     -4.03726      6.50979          0.0
-x ^ 3         │     1.04075    0.0151001      68.9236  1.77641e-85      1.01079      1.07071          1.0
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci          VIF
+──────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │  -0.0637235      2.38304   -0.0267404     0.978721                   -4.7922      4.66475          0.0
+x ^ 3         │     1.05722    0.0135394      78.0847  9.55196e-91         ***       1.03036      1.08409          1.0
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
-![Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_02.svg "Overview Plots")
+![Illustrative Overview Plots](https://github.com/ericqu/LinearRegressionKit.jl/raw/main/assets/asset_exe_072_02.svg "Illustrative Overview Plots")
 
 Further, in addition to the diagnostic plots helping confirm if the residuals are normally distributed, a few tests can be requested:
 
@@ -198,27 +209,30 @@ Giving:
 Model definition:       y ~ 1 + :(x ^ 3)
 Used observations:      10001
 Model statistics:
-  R²: 0.997951                  Adjusted R²: 0.997951
-  MSE: 43.4392                  RMSE: 6.59084
-  σ̂²: 43.4392                   AIC: 37719.4
+  R²: 0.99795                   Adjusted R²: 0.99795
+  MSE: 43.4904                  RMSE: 6.59472
+  σ̂²: 43.4904                   AIC: 37731.2
+  F Value: 4.868e+06 with degrees of freedom 1 and 9999, Pr > F (p-value): 0
 Confidence interval: 95%
 
 Coefficients statistics:
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci          VIF
-──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
-(Intercept)   │     11.3151    0.0815719      138.714          0.0      11.1552       11.475          0.0
-x ^ 3         │     1.03984  0.000471181      2206.87          0.0      1.03892      1.04076          1.0
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci          VIF
+──────────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │     11.3419    0.0816199       138.96          0.0         ***       11.1819      11.5019          0.0
+x ^ 3         │     1.04021  0.000471459      2206.35          0.0         ***       1.03928      1.04113          1.0
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Diagnostic Tests:
 
 Kolmogorov-Smirnov test (Normality of residuals):
-  KS statistic: 3.47709    observations: 10001    p-value: 0.0
+  KS statistic: 3.05591    observations: 10001    p-value: 0.0
   with 95.0% confidence: reject null hyposthesis.
 Anderson–Darling test (Normality of residuals):
-  A² statistic: 24.924901    observations: 10001    p-value: 0.0
+  A² statistic: 25.508958    observations: 10001    p-value: 0.0
   with 95.0% confidence: reject null hyposthesis.
 Jarque-Bera test (Normality of residuals):
-  JB statistic: 241.764504    observations: 10001    p-value: 0.0
+  JB statistic: 240.520153    observations: 10001    p-value: 0.0
   with 95.0% confidence: reject null hyposthesis.
 ```
 
@@ -230,28 +244,33 @@ lr = regress(@formula(y ~ 1 + x^3 ), vdf, cov=["white", "nw"])
 Giving:
 ```
 Model definition:       y ~ 1 + :(x ^ 3)
-Used observations:      101
+Used observations:      10001
 Model statistics:
-  R²: 0.979585                  Adjusted R²: 0.979379
-  MSE: 466.724                  RMSE: 21.6038
+  R²: 0.99795                   Adjusted R²: 0.99795
+  MSE: 43.4904                  RMSE: 6.59472
+  PRESS: 435034
+  F Value: 4.868e+06 with degrees of freedom 1 and 9999, Pr > F (p-value): 0
 Confidence interval: 95%
 
-White's covariance estimator (HC3):
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci
-──────────────┼─────────────────────────────────────────────────────────────────────────────
-(Intercept)   │     1.23626      2.66559     0.463785      0.64382     -4.05285      6.52538
-x ^ 3         │     1.04075    0.0145322      71.6169  4.30034e-87      1.01192      1.06959
+White's covariance estimator (HC0):
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci
+──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │     11.3419    0.0828903       136.83          0.0         ***       11.1794      11.5044
+x ^ 3         │     1.04021  0.000471604      2205.67          0.0         ***       1.03928      1.04113
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Newey-West's covariance estimator:
-Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)       low ci      high ci
-──────────────┼─────────────────────────────────────────────────────────────────────────────
-(Intercept)   │     1.23626       2.4218     0.510472     0.610857     -3.56912      6.04165
-x ^ 3         │     1.04075    0.0129463      80.3897  5.60424e-92      1.01506      1.06644
+Terms ╲ Stats │       Coefs      Std err            t     Pr(>|t|)         code       low ci      high ci
+──────────────┼──────────────────────────────────────────────────────────────────────────────────────────
+(Intercept)   │     11.3419     0.158717        71.46          0.0         ***       11.0308       11.653
+x ^ 3         │     1.04021  0.000863819      1204.19          0.0         ***       1.03851       1.0419
+
+        Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
-## Notable changes since version 0.74
-- The Sweep operator algorithm has been modified to work with column major. This should gives a performance boost.
-- The ```sweep_linreg``` function is now exported if one would like to do the linear regression with alreadz prepared design matrix. Although this gives back only the coefficients from the regression.
-- fix the White and Breusch-Pagan test description. 
+## Notable changes since version 0.76
+- Added the F Value (F Statistics) as a default statistic computed when a model is fitted.
+- Significance codes similar to R (lm) are also displayed when p_values are requested (which they are by default).
