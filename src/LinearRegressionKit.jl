@@ -323,24 +323,17 @@ end
     (internal) Get squared semi-partial correlation coefficient given a TYPE1SS or Type2SS.
 """
 function get_scorr(typess, sst, intercept)
-    @show(typess)
-    @show(sst)
-    @show(intercept)
-
     scorr = Vector{Union{Missing, Float64}}(undef, length(typess))
     if intercept 
         @inbounds scorr[1] = missing
         @inbounds for i in 2:length(typess)
-            scorr[i] = typess[i] / sst[i]
+            scorr[i] = typess[i] / sst
         end
     else    
         @inbounds for i in 1:length(typess)
-            scorr[i] = typess[i] / sst[i]
+            scorr[i] = typess[i] / sst
         end
     end
-    @show(length(typess))
-    @show(length(scorr))
-    @show(scorr)
     return scorr
 end
 
