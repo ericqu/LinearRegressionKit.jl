@@ -14,7 +14,7 @@ Fitting the model generates some statistics dependent on the `req_stats` argumen
 - ``n``, ``p``, `"coefs"` and `"see"` are always computed
 - `"mse"`, `"sst"`, `"rmse"`, `"aic"`,  `"sigma"`, `"t_statistic"`, `"vif"`, `"r2"`, `"adjr2"`, `"stderror"`, `"t_values"`, `"p_values"`, `"ci"`, `"press"`, and `"cond"` are computed upon request.
   - some diagnostics can be requested as well. Here is the full list as Symbols `[:diag_normality, :diag_ks, :diag_ad, :diag_jb, :diag_heteroskedasticity, :diag_white, :diag_bp ]`, `"diag_normality"` is a shortcut for `[:diag_ks, :diag_ad, :diag_jb]` and `:diag_heteroskedasticity` is a shortcut for `[:diag_white, :diag_bp]`. 
-- "default", includes the mandatory stats, and some of the optional statistics here as Symbols: `[:coefs, :sse, :mse, :sst, :rmse, :sigma, :t_statistic, :r2, :adjr2, :stderror, :t_values, :p_values, :ci]`
+- "default", includes the mandatory stats, and some of the optional statistics here as Symbols: `[:coefs, :sse, :mse, :sst, :rmse, :sigma, :t_statistic, :r2, :adjr2, :stderror, :t_values, :p_values, :ci, :f_stats]`
 - `"all"` includes all availble statistics
 - `"none"` include only the mandatory statistics
 
@@ -86,6 +86,9 @@ The lower bound of the confidence interval for each coefficient is calculated as
 
 #### p-values
 The p-values are computed using the F Distribution, the degree of freedom for each coefficent.
+
+#### F Value (F Statistic)
+The F Value (F Statistic) is computed using the F Distribution, the degree of freedom for the exaplined and unexplained variance.
 
 #### Variance inflation factor
 Variance inflation factor (VIF) is calculated by taking the diagonal elements of the inverse of the correlation matrix formed by the independent variables.
