@@ -111,25 +111,25 @@ function sweep_op_fullT1SS!(A::AbstractMatrix{Float64})
     return A[p,p], TypeISS
 end
 
-"""
-    function sweep_op_fullT1SS!(A::AbstractMatrix{Float64})
+# """
+#     function sweep_op_fullT1SS!(A::AbstractMatrix{Float64})
 
-    (internal) Get SSE, error sum of squares for all (p-1) models.
-    Also give Type I SS for all independent variables.
-"""
-function sweep_op_allT1SS!(A::AbstractMatrix{Float64})
-    n , p = size(A)
-    TypeISS = Vector{Float64}(undef, p-1)
-    SSEs = Vector{Float64}(undef, p-1)
+#     (internal) Get SSE, error sum of squares for all (p-1) models.
+#     Also give Type I SS for all independent variables.
+# """
+# function sweep_op_allT1SS!(A::AbstractMatrix{Float64})
+#     n , p = size(A)
+#     TypeISS = Vector{Float64}(undef, p-1)
+#     SSEs = Vector{Float64}(undef, p-1)
 
-    for k in 1:p-1
-        preSSE = A[p,p]
-        sweep_op_internal!(A, k)
-        SSEs[k] = A[p, p]
-        TypeISS[k] = preSSE - A[p,p]
-    end
-    return SSEs, TypeISS
-end
+#     for k in 1:p-1
+#         preSSE = A[p,p]
+#         sweep_op_internal!(A, k)
+#         SSEs[k] = A[p, p]
+#         TypeISS[k] = preSSE - A[p,p]
+#     end
+#     return SSEs, TypeISS
+# end
 
 """
     function get_TypeIISS(extended_inverse::AbstractMatrix{Float64})

@@ -327,14 +327,13 @@ function get_scorr(typess, sst, intercept)
     if intercept 
         @inbounds scorr[1] = missing
         @inbounds for i in 2:length(typess)
-            scorr[i] = typess[i] / sst[i]
+            scorr[i] = typess[i] / sst
         end
     else    
         @inbounds for i in 1:length(typess)
-            scorr[i] = typess[i] / sst[i]
+            scorr[i] = typess[i] / sst
         end
     end
-
     return scorr
 end
 
