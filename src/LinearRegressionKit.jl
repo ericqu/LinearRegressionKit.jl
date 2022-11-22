@@ -460,7 +460,7 @@ function regress(f::StatsModels.FormulaTerm, df::DataFrames.AbstractDataFrame; Î
     xy = [x y]
 
     if :cond in needed_stats
-        scalar_stats[:cond] = cond(xy)
+        scalar_stats[:cond] = cond(x)
     end
 
     xytxy = xy' * xy 
