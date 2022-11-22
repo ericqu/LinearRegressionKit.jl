@@ -1,7 +1,7 @@
 name = "LinearRegressionKit"
 uuid = "e91d531d-6e51-44a8-96b7-a10d5d51daa3"
 authors = ["Eric Quere <13007637+ericqu@users.noreply.github.com>"]
-version = "0.7.8"
+version = "0.7.9"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
