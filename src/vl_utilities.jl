@@ -3,7 +3,7 @@ using StatsBase, LinearAlgebra , Distributions # for the density/histogram plot
 function fitplot!(all_plots, results, lm, plot_args)
 
     lhs = terms(lm.updformula.lhs)
-    rhs_noint = filter(isnotintercept, terms(lm.updformula.rhs))
+    rhs_noint = filter(isnotinterceptorconstant, terms(lm.updformula.rhs))
 
     length(rhs_noint) == 0 && return nothing
     length(rhs_noint) > 1 && begin
