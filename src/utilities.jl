@@ -325,7 +325,7 @@ using NamedArrays
 """
 function my_namedarray_print(io::IO, n)
     tmpio = IOBuffer()
-    show(tmpio, n)
+    show(tmpio, MIME"text/plain"(), n)
     println(io, split(replace(String(take!(tmpio)), @raw_str("\"")=>@raw_str(" ")), "\n", limit=2)[2])
 end
 my_namedarray_print(n::NamedArray) = my_namedarray_print(stdout::IO, n)
