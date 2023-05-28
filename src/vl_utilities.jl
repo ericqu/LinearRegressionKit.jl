@@ -3,7 +3,7 @@ using StatsBase, LinearAlgebra , Distributions # for the density/histogram plot
 function fitplot!(all_plots, results, lm, plot_args)
 
     lhs = terms(lm.updformula.lhs)
-    rhs_noint = filter(isnotinterceptorconstant, terms(lm.updformula.rhs))
+    rhs_noint = filter(isnotintercept, terms(lm.updformula.rhs))
 
     length(rhs_noint) == 0 && return nothing
     length(rhs_noint) > 1 && begin
@@ -116,10 +116,12 @@ function residuals_plots!(all_plots, results, lm, plot_args)
 
     # additional plot per dependent variable
     for c_dependent_var in rhs_noint
-        c_sym = c_dependent_var.sym
-        show_density = density_requested && iscontinuousterm(c_dependent_var)
-        all_plots[string("residuals ", string(c_sym))] = simple_residuals_plot(results, c_sym, show_density, plot_width=plot_width, loess_bandwidth=loess_bw)
-        all_plots[string("st residuals ", string(c_sym))] = simple_residuals_plot(results, c_sym, show_density, true, plot_width=plot_width, loess_bandwidth=loess_bw)
+        if ! isa(c_dependent_var, ConstantTerm)
+            c_sym = c_dependent_var.sym
+            show_density = density_requested && iscontinuousterm(c_dependent_var)
+            all_plots[string("residuals ", string(c_sym))] = simple_residuals_plot(results, c_sym, show_density, plot_width=plot_width, loess_bandwidth=loess_bw)
+            all_plots[string("st residuals ", string(c_sym))] = simple_residuals_plot(results, c_sym, show_density, true, plot_width=plot_width, loess_bandwidth=loess_bw)
+        end
     end
 
 end

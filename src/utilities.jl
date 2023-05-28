@@ -433,7 +433,6 @@ end
 
 isnotintercept(t::AbstractTerm) = t isa InterceptTerm ? false : true
 isnotconstant(t::AbstractTerm) = t isa ConstantTerm ? false : true
-isnotinterceptorconstant(t::AbstractTerm) = (isa(t, InterceptTerm) || isa(t, ConstantTerm)) ? false : true
 iscontinuousterm(t::AbstractTerm) = t isa ContinuousTerm ? true : false
 iscategorical(t::AbstractTerm) = t isa CategoricalTerm ? true : false
 
