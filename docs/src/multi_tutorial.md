@@ -1,6 +1,6 @@
 ## Tutorial multiple linear regression with categorical variables
 
-This tutorial details a multiple regression analysis based on the "carseat" dataset (Information about car seat sales in 400 or so stores). This tutorial follows roughly the same steps done the datasets in the "An Introduction to Statistical Learning" book (https://www.statlearning.com/), from pages 119, 120, and 124.
+This tutorial details a multiple regression analysis based on the "carseat" dataset (Information about car seat sales in 400 stores). This tutorial follows roughly the same steps done the datasets in the "An Introduction to Statistical Learning" book (https://www.statlearning.com/), from pages 119, 120, and 124.
 
 ### First, creating the dataset.
 
