@@ -325,7 +325,7 @@ using NamedArrays
 """
 function my_namedarray_print(io::IO, n)
     tmpio = IOBuffer()
-    show(tmpio, n)
+    show(tmpio, MIME"text/plain"(), n)
     println(io, split(replace(String(take!(tmpio)), @raw_str("\"")=>@raw_str(" ")), "\n", limit=2)[2])
 end
 my_namedarray_print(n::NamedArray) = my_namedarray_print(stdout::IO, n)
@@ -432,6 +432,7 @@ function real_sqrt(x)
 end
 
 isnotintercept(t::AbstractTerm) = t isa InterceptTerm ? false : true
+isnotconstant(t::AbstractTerm) = t isa ConstantTerm ? false : true
 iscontinuousterm(t::AbstractTerm) = t isa ContinuousTerm ? true : false
 iscategorical(t::AbstractTerm) = t isa CategoricalTerm ? true : false
 

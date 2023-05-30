@@ -271,6 +271,5 @@ x ^ 3         │     1.04021  0.000863819      1204.19          0.0         ***
 
 Finally if you would like more examples I encourage you to go to the documentation as it gives a few more examples. 
 
-## Notable changes since version 0.76
-- Added the F Value (F Statistics) as a default statistic computed when a model is fitted.
-- Significance codes similar to R (lm) are also displayed when p_values are requested (which they are by default).
+## Notable changes since version 0.7.10
+- allow more recent dependent packages
