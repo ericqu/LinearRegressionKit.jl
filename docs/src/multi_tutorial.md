@@ -8,7 +8,7 @@ We create the dataset with the help of the `DataFrames.jl` and `Download` packag
 
 ```@example multir
 using Downloads, DataFrames, CSV
-df = DataFrame(CSV.File(Downloads.download("https://raw.githubusercontent.com/Kulbear/ISLR-Python/master/data/Carseats.csv")))
+df = DataFrame(CSV.File(Downloads.download("https://raw.githubusercontent.com/JWarmenhoven/ISLR-python/master/Notebooks/Data/Carseats.csv")))
 describe(df)
 ```
 
